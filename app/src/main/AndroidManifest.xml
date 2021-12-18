@@ -13,6 +13,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
         <activity android:name="com.example.effectByScrollInOut.EffectDemoActivity">
+        </activity>
+        <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
