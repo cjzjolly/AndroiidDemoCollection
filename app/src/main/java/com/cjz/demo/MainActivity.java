@@ -10,6 +10,7 @@ import android.widget.ScrollView;
 import androidx.annotation.Nullable;
 
 import com.example.effectByScrollInOut.EffectDemoActivity;
+import com.example.picCutview.PicCutActivity;
 
 public class MainActivity extends Activity {
 
@@ -28,5 +29,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, EffectDemoActivity.class));
         });
         linearLayoutContainer.addView(btnDemoBigHeightVideoScale);
+        //图片裁剪控件：
+        Button btnDemoPicCut = new Button(this);
+        btnDemoPicCut.setText("图片裁剪控件");
+        btnDemoPicCut.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, PicCutActivity.class));
+        });
+        linearLayoutContainer.addView(btnDemoPicCut);
     }
 }
