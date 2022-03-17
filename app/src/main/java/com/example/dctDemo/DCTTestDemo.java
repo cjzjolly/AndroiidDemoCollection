@@ -2,6 +2,7 @@ package com.example.dctDemo;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -14,6 +15,7 @@ public class DCTTestDemo extends Activity {
 
         LinearLayout totalView = new LinearLayout(this);
         totalView.setOrientation(LinearLayout.VERTICAL);
+        totalView.setGravity(Gravity.CENTER);
         for (int y = 0; y < 8; y ++) {
             LinearLayout hLinearLayout = new LinearLayout(this);
             hLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -21,7 +23,7 @@ public class DCTTestDemo extends Activity {
                 DCTBaseView b = new DCTBaseView(this);
                 b.calcDCTBase(x, y);
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(8 * 15, 8 * 15);
-                layoutParams.setMargins(10, 10, 10, 10);
+                layoutParams.setMargins(8, 8, 8, 8);
                 b.setLayoutParams(layoutParams);
                 hLinearLayout.addView(b);
             }

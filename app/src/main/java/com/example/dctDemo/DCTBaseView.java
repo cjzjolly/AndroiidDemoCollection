@@ -2,6 +2,7 @@ package com.example.dctDemo;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -13,6 +14,8 @@ import androidx.annotation.Nullable;
 public class DCTBaseView extends View {
     private double mDCTBaseMatrix[][] = new double[8][8];
     private double mInputSignal[][] = new double[8][8];
+    private int mU;
+    private int mV;
 
     public DCTBaseView(Context context) {
         super(context);
@@ -38,6 +41,8 @@ public class DCTBaseView extends View {
     }
 
     public void calcDCTBase(int u, int v) {
+        this.mU = u;
+        this.mV = v;
         double c_u = 1;
         double c_v = 1;
         if (u == 0 && v == 0) {
@@ -45,7 +50,9 @@ public class DCTBaseView extends View {
         }
         for (int y = 0; y < 8; y ++) {
             for (int x = 0; x < 8; x ++) {
-                double base = c_u * c_v * mInputSignal[x][y] * Math.cos(Math.toDegrees((2 * x + 1) * u * 3.1415926f / 16f)) * Math.cos(Math.toDegrees((2 * y + 1) * v * 3.1415926f / 16f));
+//                double base = c_u * c_v * mInputSignal[x][y] * Math.cos(Math.toDegrees((2 * x + 1) * u * Math.PI / 16f)) * Math.cos(Math.toDegrees((2 * y + 1) * v * Math.PI / 16f));
+//                double base = c_u * c_v * mInputSignal[x][y] * Math.cos(Math.toRadians((2 * x + 1) * u * Math.PI / 16f)) * Math.cos(Math.toRadianss((2 * y + 1) * v * Math.PI / 16f));
+                double base = c_u * c_v * mInputSignal[x][y] * Math.cos(((2 * x + 1) * u * Math.PI / 16f)) * Math.cos(((2 * y + 1) * v * Math.PI / 16f));
                 mDCTBaseMatrix[x][y] = base;
                 Log.i("cjztest", String.format("mDCTBaseMatrix[%d][%d] == %f", x, y, base));
             }
@@ -75,12 +82,18 @@ public class DCTBaseView extends View {
                 RectF rectF = new RectF(x, y, x + wStep, y + hStep);
 //                int val = (int) (mDCTBaseMatrix[col][line]);
                 int val = (int) (((mDCTBaseMatrix[col][line] + 1f) / 2f) * 255f);
-                paint.setColor(0xFF000000 | (val < 0 ? 0 : val) << 8 * 2);
-//                paint.setColor(0xFF000000 | val << 8 * 2);
+//                paint.setColor(0xFF000000 | (val < 0 ? 0 : val) << 8 * 2);
+                paint.setColor(0xFF000000 | val << 8 * 2 | val << 8 | val);
                 canvas.drawRect(rectF, paint);
                 col++;
             }
             line ++;
         }
+        //debug
+//        paint.setStrokeWidth(3);
+//        paint.setTextSize(20);
+//        paint.setColor(Color.GREEN);
+//        paint.setStyle(Paint.Style.STROKE);
+//        canvas.drawText(String.format("%d, %d", mU, mV), 10, 20, paint);
     }
 }
