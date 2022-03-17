@@ -9,6 +9,7 @@ import android.widget.ScrollView;
 
 import androidx.annotation.Nullable;
 
+import com.example.dctDemo.DCTTestDemo;
 import com.example.effectByScrollInOut.EffectDemoActivity;
 import com.example.picCutview.PicCutActivity;
 
@@ -36,5 +37,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, PicCutActivity.class));
         });
         linearLayoutContainer.addView(btnDemoPicCut);
+        //DCT算法展示Demo：
+        Button btnDemoDCTCut = new Button(this);
+        btnDemoDCTCut.setText("DCT算法Demo");
+        btnDemoDCTCut.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, DCTTestDemo.class));
+        });
+        linearLayoutContainer.addView(btnDemoDCTCut);
     }
 }
