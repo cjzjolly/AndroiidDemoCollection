@@ -36,8 +36,17 @@ public class DCTBaseView extends View {
         for (int y = 0; y < 8; y ++) {
             for (int x = 0; x < 8; x ++) {
                 mInputSignal[x][y] = 1;
+//                mInputSignal[x][y] = 0;
             }
         }
+    }
+
+    public void setInputSignalVal(int x, int y, double val) {
+        mInputSignal[x][y] = val;
+    }
+
+    public double getSignalDCTBaseVal(int x, int y) {
+        return mDCTBaseMatrix[x][y];
     }
 
     public void calcDCTBase(int u, int v) {
@@ -53,6 +62,7 @@ public class DCTBaseView extends View {
 //                double base = c_u * c_v * mInputSignal[x][y] * Math.cos(Math.toDegrees((2 * x + 1) * u * Math.PI / 16f)) * Math.cos(Math.toDegrees((2 * y + 1) * v * Math.PI / 16f));
 //                double base = c_u * c_v * mInputSignal[x][y] * Math.cos(Math.toRadians((2 * x + 1) * u * Math.PI / 16f)) * Math.cos(Math.toRadianss((2 * y + 1) * v * Math.PI / 16f));
                 double base = c_u * c_v * mInputSignal[x][y] * Math.cos(((2 * x + 1) * u * Math.PI / 16f)) * Math.cos(((2 * y + 1) * v * Math.PI / 16f));
+                //todo 明天把f(x, y)作为系数的部分也实现
                 mDCTBaseMatrix[x][y] = base;
                 Log.i("cjztest", String.format("mDCTBaseMatrix[%d][%d] == %f", x, y, base));
             }
