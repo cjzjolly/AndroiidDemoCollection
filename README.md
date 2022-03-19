@@ -15,4 +15,5 @@ https://blog.csdn.net/cjzjolly/article/details/120438494?ops_request_misc=%257B%
 ```
 ![输入图片说明](doc/1639910285(1).png)
 
-
+3、使用Java实现的DCT变换Demo：
+![输入图片说明](doc/image/dctDemoimage.png)
