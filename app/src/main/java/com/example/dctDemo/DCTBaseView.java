@@ -13,31 +13,19 @@ import androidx.annotation.Nullable;
 
 public class DCTBaseView extends View {
     private double mDCTBaseMatrix[][] = new double[8][8];
-    private double mInputSignal[][] = new double[8][8];
     private int mU;
     private int mV;
 
     public DCTBaseView(Context context) {
         super(context);
-        init();
     }
 
     public DCTBaseView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
     }
 
     public DCTBaseView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
-    }
-
-    private void init() {
-        for (int y = 0; y < 8; y ++) {
-            for (int x = 0; x < 8; x ++) {
-                mInputSignal[x][y] = 1;
-            }
-        }
     }
 
     public double getSignalDCTBaseVal(int x, int y) {
@@ -54,7 +42,7 @@ public class DCTBaseView extends View {
         }
         for (int y = 0; y < 8; y ++) {
             for (int x = 0; x < 8; x ++) {
-                double base = c_u * c_v * mInputSignal[x][y] * Math.cos(((2 * x + 1) * u * Math.PI / 16f)) * Math.cos(((2 * y + 1) * v * Math.PI / 16f));
+                double base = c_u * c_v * Math.cos(((2 * x + 1) * u * Math.PI / 16f)) * Math.cos(((2 * y + 1) * v * Math.PI / 16f));
                 mDCTBaseMatrix[x][y] = base;
             }
         }
