@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.example.dctDemo.DCTTestDemo;
 import com.example.effectByScrollInOut.EffectDemoActivity;
+import com.example.pdfReader.PdfReaderDemo;
 import com.example.picCutview.PicCutActivity;
 
 public class MainActivity extends Activity {
@@ -44,5 +45,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, DCTTestDemo.class));
         });
         linearLayoutContainer.addView(btnDemoDCTCut);
+        //pdf阅读展示Demo：
+        Button pdfDemoBtn = new Button(this);
+        pdfDemoBtn.setText("pdf阅读展示Demo");
+        pdfDemoBtn.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, PdfReaderDemo.class));
+        });
+        linearLayoutContainer.addView(pdfDemoBtn);
     }
 }

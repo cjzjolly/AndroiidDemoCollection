@@ -18,6 +18,8 @@
         </activity>
         <activity android:name="com.example.dctDemo.DCTTestDemo">
         </activity>
+        <activity android:name="com.example.pdfReader.PdfReaderDemo">
+        </activity>
         <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
