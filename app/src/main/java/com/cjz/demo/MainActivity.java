@@ -52,5 +52,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, PdfReaderDemo.class));
         });
         linearLayoutContainer.addView(pdfDemoBtn);
+        //CameraX API Demo：
+        Button cameraXDemoBtn = new Button(this);
+        cameraXDemoBtn.setText("CameraX API Demo");
+        cameraXDemoBtn.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, com.example.cameraXDemo.MainActivity.class));
+        });
+        linearLayoutContainer.addView(cameraXDemoBtn);
     }
 }

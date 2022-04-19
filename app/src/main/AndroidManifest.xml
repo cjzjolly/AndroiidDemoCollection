@@ -4,6 +4,8 @@
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -19,6 +21,8 @@
         <activity android:name="com.example.dctDemo.DCTTestDemo">
         </activity>
         <activity android:name="com.example.pdfReader.PdfReaderDemo">
+        </activity>
+        <activity android:name="com.example.cameraXDemo.MainActivity">
         </activity>
         <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
