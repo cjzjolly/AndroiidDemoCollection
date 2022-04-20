@@ -22,7 +22,7 @@
         </activity>
         <activity android:name="com.example.pdfReader.PdfReaderDemo">
         </activity>
-        <activity android:name="com.example.cameraXDemo.MainActivity">
+        <activity android:name="com.example.cameraXDemo.CameraXDemoActivity_1">
         </activity>
         <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>

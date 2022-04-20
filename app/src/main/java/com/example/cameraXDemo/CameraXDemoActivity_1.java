@@ -44,19 +44,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * todo bug 后台再回来就不能看到预览了
- * **/
-public class MainActivity extends Activity implements LifecycleOwner {
+
+public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     private ProcessCameraProvider mCameraPRrovider = null;
     private int mLensFacing = CameraSelector.LENS_FACING_BACK;
-    private PreviewView mPreview;
+    private PreviewView mPreviewView;
     private LifecycleRegistry mLifecycleRegistry;
     /**拍照器**/
     private ImageCapture mImageCapture;
     private ExecutorService mTakePhotoExecutor;
     private Button mBtnTakePhoto;
     private ImageView mImagePhoto;
+    private Preview mPreview;
 
 
     @Override
@@ -73,18 +72,18 @@ public class MainActivity extends Activity implements LifecycleOwner {
         mLifecycleRegistry.markState(Lifecycle.State.CREATED);
 
         setContentView(R.layout.camera_x_demo);
-        mPreview = (PreviewView) findViewById(R.id.pv);
+        mPreviewView = (PreviewView) findViewById(R.id.pv);
         mBtnTakePhoto = findViewById(R.id.btn_take_photo);
         mImagePhoto = findViewById(R.id.iv_photo);
-
         ListenableFuture<ProcessCameraProvider> processCameraProvider = ProcessCameraProvider.getInstance(this);
+        //todo : 放到resume年，onResume之后就不会黑屏。看起来像是线程被卡
         processCameraProvider.addListener(() -> {
             try {
                 mCameraPRrovider = processCameraProvider.get();
                 if (hasBackCamera()) {
                     mLensFacing = CameraSelector.LENS_FACING_BACK;
                 } if (hasFrontCamera()) {
-                    mLensFacing = CameraSelector.LENS_FACING_FRONT;
+//                    mLensFacing = CameraSelector.LENS_FACING_FRONT;
                 } else {
                     throw new IllegalStateException("前后摄像头都没");
                 }
@@ -95,8 +94,7 @@ public class MainActivity extends Activity implements LifecycleOwner {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }, getMainExecutor());
-
+        }, getMainExecutor()); //只能在主线程
         mBtnTakePhoto.setOnClickListener(v -> {
             takePhoto(mImageCapture);
         });
@@ -117,6 +115,10 @@ public class MainActivity extends Activity implements LifecycleOwner {
     @Override
     protected void onResume() {
         super.onResume();
+        if (mPreview != null) { //todo 这个mPreview onPause的时候被destroyed了，导致回来的时候预览卡住
+            //为预览窗口添加surface通道
+            mPreview.setSurfaceProvider(mPreviewView.getSurfaceProvider());
+        }
         mLifecycleRegistry.markState(Lifecycle.State.RESUMED);
     }
 
@@ -151,7 +153,7 @@ public class MainActivity extends Activity implements LifecycleOwner {
         CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(mLensFacing).build();
         int aspectRatio = AspectRatio.RATIO_4_3;
         //预览界面：
-        Preview preview = new Preview.Builder()
+        mPreview = new Preview.Builder()
                 .setTargetAspectRatio(aspectRatio)
                 .setTargetRotation(getDisplay().getRotation())
                 .build();
@@ -170,9 +172,9 @@ public class MainActivity extends Activity implements LifecycleOwner {
         cameraProvider.unbindAll();
         //绑定生命周期、预览窗、拍照获取器等
         Camera camera = cameraProvider.bindToLifecycle(this,
-                cameraSelector, preview, mImageCapture, imageAnalysis);
+                cameraSelector, mPreview, mImageCapture, imageAnalysis);
         //为预览窗口添加surface通道
-        preview.setSurfaceProvider(mPreview.getSurfaceProvider());
+        mPreview.setSurfaceProvider(mPreviewView.getSurfaceProvider());
     }
 
     /**实际拍照逻辑**/
@@ -232,7 +234,7 @@ public class MainActivity extends Activity implements LifecycleOwner {
                         // images unless we scan them using [MediaScannerConnection]
                         String mimeType = MimeTypeMap.getSingleton()
                                 .getMimeTypeFromExtension(".jpg");
-                        MediaScannerConnection.scanFile(MainActivity.this,
+                        MediaScannerConnection.scanFile(CameraXDemoActivity_1.this,
                                 new String[] {savedUri.getPath()},
                                 new String[] {mimeType},
                                 new MediaScannerConnection.OnScanCompletedListener() {

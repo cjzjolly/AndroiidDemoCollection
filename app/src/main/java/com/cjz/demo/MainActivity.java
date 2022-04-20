@@ -9,6 +9,7 @@ import android.widget.ScrollView;
 
 import androidx.annotation.Nullable;
 
+import com.example.cameraXDemo.CameraXDemoActivity_1;
 import com.example.dctDemo.DCTTestDemo;
 import com.example.effectByScrollInOut.EffectDemoActivity;
 import com.example.pdfReader.PdfReaderDemo;
@@ -56,7 +57,7 @@ public class MainActivity extends Activity {
         Button cameraXDemoBtn = new Button(this);
         cameraXDemoBtn.setText("CameraX API Demo");
         cameraXDemoBtn.setOnClickListener(v -> {
-            startActivity(new Intent(MainActivity.this, com.example.cameraXDemo.MainActivity.class));
+            startActivity(new Intent(MainActivity.this, CameraXDemoActivity_1.class));
         });
         linearLayoutContainer.addView(cameraXDemoBtn);
     }
