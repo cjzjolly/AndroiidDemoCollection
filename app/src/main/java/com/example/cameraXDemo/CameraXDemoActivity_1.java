@@ -11,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
+import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -56,6 +57,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     private Button mBtnTakePhoto;
     private ImageView mImagePhoto;
     private Preview mPreview;
+    private Button mBtnFlashLight;
 
 
     @Override
@@ -72,6 +74,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
         mLifecycleRegistry.markState(Lifecycle.State.CREATED);
 
         setContentView(R.layout.camera_x_demo);
+        mBtnFlashLight = findViewById(R.id.btn_flash_light);
         mPreviewView = (PreviewView) findViewById(R.id.pv);
         mBtnTakePhoto = findViewById(R.id.btn_take_photo);
         mImagePhoto = findViewById(R.id.iv_photo);
@@ -89,8 +92,29 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
             }
 //        }, getMainExecutor()); //只能在主线程
         }, ContextCompat.getMainExecutor(this)); //只能在主线程
+        //拍照按钮
         mBtnTakePhoto.setOnClickListener(v -> {
             takePhoto(mImageCapture);
+        });
+        //闪光灯
+        mBtnFlashLight.setOnClickListener(v -> {
+            switch ((String) v.getTag()) {
+                case "auto":
+                    mImageCapture.setFlashMode(ImageCapture.FLASH_MODE_ON);
+                    ((Button) v).setText("闪光灯:常开");
+                    v.setTag("on");
+                    break;
+                case "on":
+                    mImageCapture.setFlashMode(ImageCapture.FLASH_MODE_OFF);
+                    ((Button) v).setText("闪光灯:关闭");
+                    v.setTag("off");
+                    break;
+                default:
+                    mImageCapture.setFlashMode(ImageCapture.FLASH_MODE_AUTO);
+                    ((Button) v).setText("闪光灯:自动");
+                    v.setTag("auto");
+                    break;
+            }
         });
     }
 
@@ -170,7 +194,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
         if (hasBackCamera()) {
             mLensFacing = CameraSelector.LENS_FACING_BACK;
         } if (hasFrontCamera()) {
-            mLensFacing = CameraSelector.LENS_FACING_FRONT;
+//            mLensFacing = CameraSelector.LENS_FACING_FRONT;
         } else {
             throw new IllegalStateException("前后摄像头都没");
         }
