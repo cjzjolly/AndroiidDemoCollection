@@ -80,13 +80,6 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
         processCameraProvider.addListener(() -> {
             try {
                 mCameraPRrovider = processCameraProvider.get();
-                if (hasBackCamera()) {
-                    mLensFacing = CameraSelector.LENS_FACING_BACK;
-                } if (hasFrontCamera()) {
-//                    mLensFacing = CameraSelector.LENS_FACING_FRONT;
-                } else {
-                    throw new IllegalStateException("前后摄像头都没");
-                }
                 //绑定预览窗等
                 bindCameraUseCases(mCameraPRrovider, null);
             } catch (ExecutionException e) {
@@ -94,7 +87,8 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }, getMainExecutor()); //只能在主线程
+//        }, getMainExecutor()); //只能在主线程
+        }, ContextCompat.getMainExecutor(this)); //只能在主线程
         mBtnTakePhoto.setOnClickListener(v -> {
             takePhoto(mImageCapture);
         });
@@ -103,7 +97,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-//        bindCameraUseCases(mCameraPRrovider, null);
+        bindCameraUseCases(mCameraPRrovider, null);
     }
 
     @Override
@@ -115,7 +109,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mPreview != null) { //todo 这个mPreview onPause的时候被destroyed了，导致回来的时候预览卡住
+        if (mPreview != null) { //todo 这个mPreview onPause的时候被destroyed了，导致回来的时候预览卡住,可能要使用fragement避一下？
             //为预览窗口添加surface通道
             mPreview.setSurfaceProvider(mPreviewView.getSurfaceProvider());
         }
@@ -150,31 +144,41 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     }
 
     private void bindCameraUseCases(ProcessCameraProvider cameraProvider, Surface surface) {
-        CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(mLensFacing).build();
-        int aspectRatio = AspectRatio.RATIO_4_3;
+         int aspectRatio = AspectRatio.RATIO_4_3;
         //预览界面：
         mPreview = new Preview.Builder()
                 .setTargetAspectRatio(aspectRatio)
-                .setTargetRotation(getDisplay().getRotation())
+                .setTargetRotation(mPreviewView.getDisplay().getRotation())
                 .build();
+        //为预览窗口添加surface通道
+        mPreview.setSurfaceProvider(mPreviewView.getSurfaceProvider());
         //照片抓取:
         mImageCapture = new ImageCapture.Builder()
                 .setTargetAspectRatio(aspectRatio)
                 //低延迟拍照，反应速度会比较快
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                .setTargetRotation(getDisplay().getRotation())
+                .setTargetRotation(mPreviewView.getDisplay().getRotation())
+                .setFlashMode(ImageCapture.FLASH_MODE_AUTO) //闪光灯调节
                 .build();
         ImageAnalysis imageAnalysis = new ImageAnalysis.Builder()
                 .setTargetAspectRatio(aspectRatio)
-                .setTargetRotation(getDisplay().getRotation())
+                .setTargetRotation(mPreviewView.getDisplay().getRotation())
                 .build();
         //解绑之前可能存在的绑定关系
         cameraProvider.unbindAll();
+        //有后置摄像头就选后置，否则用前置:
+        if (hasBackCamera()) {
+            mLensFacing = CameraSelector.LENS_FACING_BACK;
+        } if (hasFrontCamera()) {
+            mLensFacing = CameraSelector.LENS_FACING_FRONT;
+        } else {
+            throw new IllegalStateException("前后摄像头都没");
+        }
+        CameraSelector cameraSelector = new CameraSelector.Builder().requireLensFacing(mLensFacing).build();
+
         //绑定生命周期、预览窗、拍照获取器等
-        Camera camera = cameraProvider.bindToLifecycle(this,
+        cameraProvider.bindToLifecycle(this,
                 cameraSelector, mPreview, mImageCapture, imageAnalysis);
-        //为预览窗口添加surface通道
-        mPreview.setSurfaceProvider(mPreviewView.getSurfaceProvider());
     }
 
     /**实际拍照逻辑**/
