@@ -2,15 +2,18 @@ package com.example.cameraXDemo;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.SurfaceTexture;
+import android.content.res.Configuration;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Surface;
-import android.view.SurfaceView;
-import android.view.TextureView;
-import android.view.View;
-import android.widget.FrameLayout;
+import android.webkit.MimeTypeMap;
+import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,31 +23,47 @@ import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
+import androidx.camera.core.ImageCaptureException;
 import androidx.camera.core.Preview;
-import androidx.camera.core.SurfaceRequest;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.util.Consumer;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
+import com.bumptech.glide.Glide;
 import com.example.piccut.R;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+/**
+ * todo bug 后台再回来就不能看到预览了
+ * **/
 public class MainActivity extends Activity implements LifecycleOwner {
     private ProcessCameraProvider mCameraPRrovider = null;
     private int mLensFacing = CameraSelector.LENS_FACING_BACK;
     private PreviewView mPreview;
     private LifecycleRegistry mLifecycleRegistry;
+    /**拍照器**/
+    private ImageCapture mImageCapture;
+    private ExecutorService mTakePhotoExecutor;
+    private Button mBtnTakePhoto;
+    private ImageView mImagePhoto;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //拍照专用线程，让它不要卡住主线程:
+        mTakePhotoExecutor = Executors.newSingleThreadExecutor();
         //权限申请
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
@@ -55,6 +74,8 @@ public class MainActivity extends Activity implements LifecycleOwner {
 
         setContentView(R.layout.camera_x_demo);
         mPreview = (PreviewView) findViewById(R.id.pv);
+        mBtnTakePhoto = findViewById(R.id.btn_take_photo);
+        mImagePhoto = findViewById(R.id.iv_photo);
 
         ListenableFuture<ProcessCameraProvider> processCameraProvider = ProcessCameraProvider.getInstance(this);
         processCameraProvider.addListener(() -> {
@@ -63,7 +84,7 @@ public class MainActivity extends Activity implements LifecycleOwner {
                 if (hasBackCamera()) {
                     mLensFacing = CameraSelector.LENS_FACING_BACK;
                 } if (hasFrontCamera()) {
-//                    mLensFacing = CameraSelector.LENS_FACING_FRONT;
+                    mLensFacing = CameraSelector.LENS_FACING_FRONT;
                 } else {
                     throw new IllegalStateException("前后摄像头都没");
                 }
@@ -75,6 +96,16 @@ public class MainActivity extends Activity implements LifecycleOwner {
                 e.printStackTrace();
             }
         }, getMainExecutor());
+
+        mBtnTakePhoto.setOnClickListener(v -> {
+            takePhoto(mImageCapture);
+        });
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+//        bindCameraUseCases(mCameraPRrovider, null);
     }
 
     @Override
@@ -87,6 +118,13 @@ public class MainActivity extends Activity implements LifecycleOwner {
     protected void onResume() {
         super.onResume();
         mLifecycleRegistry.markState(Lifecycle.State.RESUMED);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mLifecycleRegistry.markState(Lifecycle.State.DESTROYED);
+        mTakePhotoExecutor.shutdown();
     }
 
     /** Returns true if the device has an available back camera. False otherwise */
@@ -118,7 +156,7 @@ public class MainActivity extends Activity implements LifecycleOwner {
                 .setTargetRotation(getDisplay().getRotation())
                 .build();
         //照片抓取:
-        ImageCapture imageCapture = new ImageCapture.Builder()
+        mImageCapture = new ImageCapture.Builder()
                 .setTargetAspectRatio(aspectRatio)
                 //低延迟拍照，反应速度会比较快
                 .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
@@ -132,9 +170,90 @@ public class MainActivity extends Activity implements LifecycleOwner {
         cameraProvider.unbindAll();
         //绑定生命周期、预览窗、拍照获取器等
         Camera camera = cameraProvider.bindToLifecycle(this,
-                cameraSelector, preview, imageCapture, imageAnalysis);
+                cameraSelector, preview, mImageCapture, imageAnalysis);
         //为预览窗口添加surface通道
         preview.setSurfaceProvider(mPreview.getSurfaceProvider());
+    }
+
+    /**实际拍照逻辑**/
+    private void takePhoto(ImageCapture imageCapture) {
+        if (null == imageCapture) {
+            Log.e("cjztest", "imageCapture is null");
+            return;
+        }
+        String fileFormatPattern = "yyyy-MM-dd-HH-mm-ss-SSS";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(fileFormatPattern);
+        //先存放到APP本地文件夹:
+//        File cacheFileDir = getCacheDir(); //APP内cache地址
+        File cacheFileDir = getExternalCacheDir(); //共用的、大家都可以访问的cache地址
+        if (cacheFileDir.exists() && cacheFileDir.isDirectory()) {
+            File newFile = new File(cacheFileDir.getAbsolutePath() + String.format("/%s.jpg", simpleDateFormat.format(System.currentTimeMillis())));
+            Log.i("cjztest", "newFile:" + newFile.getAbsolutePath());
+            try {
+                newFile.createNewFile();
+                if (!newFile.exists()) {
+                    return;
+                }
+                ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(newFile)
+                        .setMetadata(new ImageCapture.Metadata())
+                        .build();
+                //照片拍好之后从回调里面接收
+                imageCapture.takePicture(outputOptions, mTakePhotoExecutor, new ImageCapture.OnImageSavedCallback() {
+
+                    @Override
+                    public void onImageSaved(@NonNull ImageCapture.OutputFileResults outputFileResults) {
+                        Uri savedUri = outputFileResults.getSavedUri() == null ?
+                                Uri.fromFile(newFile) :
+                                outputFileResults.getSavedUri();
+                        //给按钮弄个照片
+                        runOnUiThread(() -> {
+                            if (newFile.exists()) {
+                                Glide.with(mImagePhoto)
+                                        .load(newFile)
+//                                .apply(RequestOptions.circleCropTransform())
+                                        .into(mImagePhoto);
+                            }
+                        });
+                        // We can only change the foreground Drawable using API level 23+ API
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            // Update the gallery thumbnail with latest picture taken
+//                            setGalleryThumbnail(savedUri);
+                        }
+
+                        // Implicit broadcasts will be ignored for devices running API level >= 24
+                        // so if you only target API level 24+ you can remove this statement
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                            sendBroadcast(
+                                    new Intent(android.hardware.Camera.ACTION_NEW_PICTURE, savedUri)
+                            );
+                        }
+                        // If the folder selected is an external media directory, this is
+                        // unnecessary but otherwise other apps will not be able to access our
+                        // images unless we scan them using [MediaScannerConnection]
+                        String mimeType = MimeTypeMap.getSingleton()
+                                .getMimeTypeFromExtension(".jpg");
+                        MediaScannerConnection.scanFile(MainActivity.this,
+                                new String[] {savedUri.getPath()},
+                                new String[] {mimeType},
+                                new MediaScannerConnection.OnScanCompletedListener() {
+                                    @Override
+                                    public void onScanCompleted(String path, Uri uri) {
+                                        Log.i("cjztest", "新文件扫描完成, 文件大小:" + newFile.length());
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onError(@NonNull ImageCaptureException exception) {
+                        Log.e("cjztest", "拍照失败");
+                    }
+                });
+            } catch (IOException e) {
+                Log.e("cjztest", "创建文件失败");
+                e.printStackTrace();
+            }
+        }
+        Log.i("cjztest", "cacheFileDir:" + cacheFileDir);
     }
 
     @NonNull
