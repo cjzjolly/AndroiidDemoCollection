@@ -78,20 +78,6 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
         mPreviewView = (PreviewView) findViewById(R.id.pv);
         mBtnTakePhoto = findViewById(R.id.btn_take_photo);
         mImagePhoto = findViewById(R.id.iv_photo);
-        ListenableFuture<ProcessCameraProvider> processCameraProvider = ProcessCameraProvider.getInstance(this);
-        //todo : 放到resume年，onResume之后就不会黑屏。看起来像是线程被卡
-        processCameraProvider.addListener(() -> {
-            try {
-                mCameraPRrovider = processCameraProvider.get();
-                //绑定预览窗等
-                bindCameraUseCases(mCameraPRrovider, null);
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-//        }, getMainExecutor()); //只能在主线程
-        }, ContextCompat.getMainExecutor(this)); //只能在主线程
         //拍照按钮
         mBtnTakePhoto.setOnClickListener(v -> {
             takePhoto(mImageCapture);
@@ -133,11 +119,27 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mPreview != null) { //todo 这个mPreview onPause的时候被destroyed了，导致回来的时候预览卡住,可能要使用fragement避一下？(并没有用)
-            //为预览窗口添加surface通道
-            mPreview.setSurfaceProvider(mPreviewView.getSurfaceProvider());
-        }
+        ListenableFuture<ProcessCameraProvider> processCameraProvider = ProcessCameraProvider.getInstance(this);
+        //回来的时候要重新绑定一下:
+        processCameraProvider.addListener(() -> {
+            try {
+                mCameraPRrovider = processCameraProvider.get();
+                //绑定预览窗等
+                bindCameraUseCases(mCameraPRrovider, null);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }, getMainExecutor()); //只能在主线程
         mLifecycleRegistry.markState(Lifecycle.State.RESUMED);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        //出去的时候要释放相机资源
+        mCameraPRrovider.unbindAll();
     }
 
     @Override
