@@ -1,24 +1,21 @@
 package com.example.cameraXDemo;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Surface;
-import android.webkit.MimeTypeMap;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.camera.core.AspectRatio;
-import androidx.camera.core.Camera;
 import androidx.camera.core.CameraInfoUnavailableException;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
@@ -33,6 +30,11 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LifecycleRegistry;
 
+import android.app.Fragment;
+import android.webkit.MimeTypeMap;
+import android.widget.Button;
+import android.widget.ImageView;
+
 import com.bumptech.glide.Glide;
 import com.example.piccut.R;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -44,8 +46,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
-public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
+public class FragmentCameraX extends Fragment implements LifecycleOwner {
     private ProcessCameraProvider mCameraPRrovider = null;
     private int mLensFacing = CameraSelector.LENS_FACING_BACK;
     private PreviewView mPreviewView;
@@ -57,25 +58,24 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     private ImageView mImagePhoto;
     private Preview mPreview;
 
-
+    @Nullable
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.camera_x_demo,null);
         //拍照专用线程，让它不要卡住主线程:
         mTakePhotoExecutor = Executors.newSingleThreadExecutor();
         //权限申请
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, 1);
         }
 
         mLifecycleRegistry = new LifecycleRegistry(this);
         mLifecycleRegistry.markState(Lifecycle.State.CREATED);
 
-        setContentView(R.layout.camera_x_demo);
-        mPreviewView = (PreviewView) findViewById(R.id.pv);
-        mBtnTakePhoto = findViewById(R.id.btn_take_photo);
-        mImagePhoto = findViewById(R.id.iv_photo);
-        ListenableFuture<ProcessCameraProvider> processCameraProvider = ProcessCameraProvider.getInstance(this);
+        mPreviewView = (PreviewView) rootView.findViewById(R.id.pv);
+        mBtnTakePhoto = rootView.findViewById(R.id.btn_take_photo);
+        mImagePhoto = rootView.findViewById(R.id.iv_photo);
+        ListenableFuture<ProcessCameraProvider> processCameraProvider = ProcessCameraProvider.getInstance(getContext());
         //todo : 放到resume年，onResume之后就不会黑屏。看起来像是线程被卡
         processCameraProvider.addListener(() -> {
             try {
@@ -88,28 +88,24 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
                 e.printStackTrace();
             }
 //        }, getMainExecutor()); //只能在主线程
-        }, ContextCompat.getMainExecutor(this)); //只能在主线程
+        }, ContextCompat.getMainExecutor(getContext())); //只能在主线程
         mBtnTakePhoto.setOnClickListener(v -> {
             takePhoto(mImageCapture);
         });
+        return rootView;
     }
 
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        bindCameraUseCases(mCameraPRrovider, null);
-    }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         mLifecycleRegistry.markState(Lifecycle.State.STARTED);
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        if (mPreview != null) { //todo 这个mPreview onPause的时候被destroyed了，导致回来的时候预览卡住,可能要使用fragement避一下？(并没有用)
+        if (mPreview != null) { //todo 这个mPreview onPause的时候被destroyed了，导致回来的时候预览卡住,可能要使用fragement避一下？
             //为预览窗口添加surface通道
             mPreview.setSurfaceProvider(mPreviewView.getSurfaceProvider());
         }
@@ -117,7 +113,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         mLifecycleRegistry.markState(Lifecycle.State.DESTROYED);
         mTakePhotoExecutor.shutdown();
@@ -144,7 +140,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     }
 
     private void bindCameraUseCases(ProcessCameraProvider cameraProvider, Surface surface) {
-         int aspectRatio = AspectRatio.RATIO_4_3;
+        int aspectRatio = AspectRatio.RATIO_4_3;
         //预览界面：
         mPreview = new Preview.Builder()
                 .setTargetAspectRatio(aspectRatio)
@@ -191,7 +187,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(fileFormatPattern);
         //先存放到APP本地文件夹:
 //        File cacheFileDir = getCacheDir(); //APP内cache地址
-        File cacheFileDir = getExternalCacheDir(); //共用的、大家都可以访问的cache地址
+        File cacheFileDir = getActivity().getExternalCacheDir(); //共用的、大家都可以访问的cache地址
         if (cacheFileDir.exists() && cacheFileDir.isDirectory()) {
             File newFile = new File(cacheFileDir.getAbsolutePath() + String.format("/%s.jpg", simpleDateFormat.format(System.currentTimeMillis())));
             Log.i("cjztest", "newFile:" + newFile.getAbsolutePath());
@@ -212,7 +208,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
                                 Uri.fromFile(newFile) :
                                 outputFileResults.getSavedUri();
                         //给按钮弄个照片
-                        runOnUiThread(() -> {
+                        getActivity().runOnUiThread(() -> {
                             if (newFile.exists()) {
                                 Glide.with(mImagePhoto)
                                         .load(newFile)
@@ -229,7 +225,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
                         // Implicit broadcasts will be ignored for devices running API level >= 24
                         // so if you only target API level 24+ you can remove this statement
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                            sendBroadcast(
+                            getContext().sendBroadcast(
                                     new Intent(android.hardware.Camera.ACTION_NEW_PICTURE, savedUri)
                             );
                         }
@@ -238,7 +234,7 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
                         // images unless we scan them using [MediaScannerConnection]
                         String mimeType = MimeTypeMap.getSingleton()
                                 .getMimeTypeFromExtension(".jpg");
-                        MediaScannerConnection.scanFile(CameraXDemoActivity_1.this,
+                        MediaScannerConnection.scanFile(getContext(),
                                 new String[] {savedUri.getPath()},
                                 new String[] {mimeType},
                                 new MediaScannerConnection.OnScanCompletedListener() {
