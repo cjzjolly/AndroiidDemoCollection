@@ -13,6 +13,7 @@ import com.example.cameraXDemo.CameraXDemoActivity_1;
 import com.example.dctDemo.DCTTestDemo;
 import com.example.effectByScrollInOut.EffectDemoActivity;
 import com.example.pdfReader.PdfReaderDemo;
+import com.example.photoSelector.PhotoSelectorPageActivity;
 import com.example.picCutview.PicCutActivity;
 
 public class MainActivity extends Activity {
@@ -60,5 +61,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, CameraXDemoActivity_1.class));
         });
         linearLayoutContainer.addView(cameraXDemoBtn);
+        //照片拖动Demo：
+        Button photoSelectorBtm = new Button(this);
+        photoSelectorBtm.setText("照片拖动Demo");
+        photoSelectorBtm.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, PhotoSelectorPageActivity.class));
+        });
+        linearLayoutContainer.addView(photoSelectorBtm);
     }
 }

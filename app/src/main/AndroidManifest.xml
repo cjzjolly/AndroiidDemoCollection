@@ -25,6 +25,8 @@
         <activity android:name="com.example.cameraXDemo.CameraXDemoActivity_1"
             android:launchMode="singleInstance">
         </activity>
+        <activity android:name="com.example.photoSelector.PhotoSelectorPageActivity">
+        </activity>
         <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
