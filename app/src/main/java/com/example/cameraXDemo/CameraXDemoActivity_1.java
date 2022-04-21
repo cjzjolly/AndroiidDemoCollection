@@ -25,6 +25,7 @@ import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageCapture;
 import androidx.camera.core.ImageCaptureException;
+import androidx.camera.core.ImageProxy;
 import androidx.camera.core.Preview;
 import androidx.camera.lifecycle.ProcessCameraProvider;
 import androidx.camera.view.PreviewView;
@@ -229,7 +230,19 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
                 ImageCapture.OutputFileOptions outputOptions = new ImageCapture.OutputFileOptions.Builder(newFile)
                         .setMetadata(new ImageCapture.Metadata())
                         .build();
-                //照片拍好之后从回调里面接收
+                //照片拍好之后从回调里面接收(todo ： 改为使用原始数据转成PNG（定为后期任务？）)
+                imageCapture.takePicture(mTakePhotoExecutor, new ImageCapture.OnImageCapturedCallback() {
+                    @Override
+                    public void onCaptureSuccess(@NonNull ImageProxy image) {
+                        super.onCaptureSuccess(image);
+//                        image.getImage().
+                    }
+
+                    @Override
+                    public void onError(@NonNull ImageCaptureException exception) {
+                        super.onError(exception);
+                    }
+                });
                 imageCapture.takePicture(outputOptions, mTakePhotoExecutor, new ImageCapture.OnImageSavedCallback() {
 
                     @Override
