@@ -160,6 +160,7 @@ public class PicSelectorByRV extends Activity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     mDataItem.mIsChecked = isChecked;
+                    tv.setBackgroundColor(mDataItem.mIsChecked ? 0xFF4040FF : 0xFFAAAAAA);
                 }
             });
         }
@@ -192,6 +193,7 @@ public class PicSelectorByRV extends Activity {
         public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
             DataItem dataItem = (DataItem) stringList.get(position);
             holder.tv.setText(dataItem.mName);
+            holder.tv.setBackgroundColor(dataItem.mIsChecked ? 0xFF4040FF : 0xFFAAAAAA);
             holder.cb.setSelected(dataItem.mIsChecked);
             holder.setDataItem(dataItem);
         }
