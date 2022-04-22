@@ -41,12 +41,10 @@ public class PicSelectorByRV extends Activity {
         boolean mIsChecked = false;
     }
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         datas = new ArrayList<>();
-//        直接用d操作集合会崩溃，Arrays.asList集合不可增删改；详细可以看我的博客
         for (int i = 0; i < 12; i++) {
             DataItem dataItem = new DataItem();
             dataItem.mName = i + "";
@@ -75,7 +73,6 @@ public class PicSelectorByRV extends Activity {
 
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-
             //得到当拖拽的viewHolder的Position
             int fromPosition = viewHolder.getAdapterPosition();
             //拿到当前拖拽到的item的viewHolder
@@ -147,15 +144,19 @@ public class PicSelectorByRV extends Activity {
         }
     });
 
-
+    /**UI条目**/
     class MyViewHolder extends RecyclerView.ViewHolder {
         private DataItem mDataItem = null;
+        public TextView tv;
+        public ImageView iv;
+        public CheckBox cb;
 
         public MyViewHolder(View itemView) {
             super(itemView);
             tv = itemView.findViewById(R.id.tv_selector_pic_index);
             iv = itemView.findViewById(R.id.iv_selector_pic_content);
             cb = itemView.findViewById(R.id.cb_set_selected);
+            /**点击选择时修改对应UI条目的样式，并更改数据表对应条目**/
             cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -165,22 +166,20 @@ public class PicSelectorByRV extends Activity {
             });
         }
 
-        public TextView tv;
-        public ImageView iv;
-        public CheckBox cb;
 
         public void setDataItem(DataItem dataItem) {
             this.mDataItem = dataItem;
         }
     }
 
+    /**表格的适配器**/
     class RecyclerViewAdapterGrid<T> extends RecyclerView.Adapter<MyViewHolder> {
         private Context context;
-        public List<T> stringList;
+        public List<T> mDataList;
 
         public RecyclerViewAdapterGrid(Context context, List<T> stringList) {
             this.context = context;
-            this.stringList = stringList;
+            this.mDataList = stringList;
         }
 
         @NonNull
@@ -191,7 +190,8 @@ public class PicSelectorByRV extends Activity {
 
         @Override
         public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-            DataItem dataItem = (DataItem) stringList.get(position);
+            //数据数据表的实际情况处理UI，并把UI条目和数据表条目进行一对一绑定
+            DataItem dataItem = (DataItem) mDataList.get(position);
             holder.tv.setText(dataItem.mName);
             holder.tv.setBackgroundColor(dataItem.mIsChecked ? 0xFF4040FF : 0xFFAAAAAA);
             holder.cb.setSelected(dataItem.mIsChecked);
@@ -200,7 +200,7 @@ public class PicSelectorByRV extends Activity {
 
         @Override
         public int getItemCount() {
-            return stringList.size();
+            return mDataList.size();
         }
     }
 }
