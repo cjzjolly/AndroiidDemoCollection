@@ -48,6 +48,7 @@ import java.util.concurrent.Executors;
 
 
 public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
+    private final String TAG = getClass().getName();
     private ProcessCameraProvider mCameraPRrovider = null;
     private int mLensFacing = CameraSelector.LENS_FACING_BACK;
     private PreviewView mPreviewView;
@@ -140,7 +141,9 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     protected void onPause() {
         super.onPause();
         //出去的时候要释放相机资源
-        mCameraPRrovider.unbindAll();
+        if (null != mCameraPRrovider) {
+            mCameraPRrovider.unbindAll();
+        }
     }
 
     @Override
@@ -153,7 +156,9 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     /** Returns true if the device has an available back camera. False otherwise */
     private boolean hasBackCamera() {
         try {
-            return mCameraPRrovider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA);
+            if (null != mCameraPRrovider) {
+                return mCameraPRrovider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA);
+            }
         } catch (CameraInfoUnavailableException e) {
             e.printStackTrace();
         }
@@ -171,7 +176,11 @@ public class CameraXDemoActivity_1 extends Activity implements LifecycleOwner {
     }
 
     private void bindCameraUseCases(ProcessCameraProvider cameraProvider, Surface surface) {
-         int aspectRatio = AspectRatio.RATIO_4_3;
+        if (null == mPreviewView) {
+            Log.e(TAG, "预览窗为空");
+            return;
+        }
+        int aspectRatio = AspectRatio.RATIO_4_3;
         //预览界面：
         mPreview = new Preview.Builder()
                 .setTargetAspectRatio(aspectRatio)
