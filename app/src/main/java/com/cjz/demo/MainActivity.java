@@ -13,6 +13,7 @@ import com.example.cameraXDemo.CameraXDemoActivity_1;
 import com.example.dctDemo.DCTTestDemo;
 import com.example.effectByScrollInOut.EffectDemoActivity;
 import com.example.pdfReader.PdfReaderDemo;
+import com.example.photoCutter.CutterActivity;
 import com.example.photoSelector.PhotoSelectorPageActivity;
 import com.example.photoSelectorByRecycler.PicSelectorByRV;
 import com.example.picCutview.PicCutActivity;
@@ -76,5 +77,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, PicSelectorByRV.class));
         });
         linearLayoutContainer.addView(photoSelectorBtm2);
+        //图片不规则裁剪demo：
+        Button photoCutterBtn = new Button(this);
+        photoCutterBtn.setText("图片不规则裁剪demo");
+        photoCutterBtn.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, CutterActivity.class));
+        });
+        linearLayoutContainer.addView(photoCutterBtn);
     }
 }

@@ -64,6 +64,47 @@ public class PhotoCutter extends View {
         return angle;
     }
 
+    /**检查如果角度更改，是否依然符合内角不超过180的要求
+     * @param dx 控制点将要偏移的值
+     * @param dy 控制点将要偏移的值
+     * @return 是否依然符合要求
+     * **/
+    private boolean willAngleFit(float dx, float dy) {
+        PointF vectorPoint[] = new PointF[mVectorPoint.length];
+        for (int i = 0; i < vectorPoint.length; i++) {
+            vectorPoint[i] = new PointF();
+            vectorPoint[i].x = mVectorPoint[i].x + (mSelectedPoint == i ? dx : 0);
+            vectorPoint[i].y = mVectorPoint[i].y + (mSelectedPoint == i ? dy : 0);
+        }
+        //不允许形成超过180度的角
+        double angle = linesAngle(vectorPoint[1],
+                new PointF(vectorPoint[0].x, vectorPoint[0].y),
+                vectorPoint[3]);
+        if (angle < 0f) {
+            return false;
+        }
+        //不允许形成超过180度的角
+        angle = linesAngle(vectorPoint[0],
+                new PointF(vectorPoint[1].x, vectorPoint[1].y),
+                vectorPoint[2]);
+        if (angle > 0f) {
+            return false;
+        }
+        angle = linesAngle(vectorPoint[1],
+                new PointF(vectorPoint[2].x, vectorPoint[2].y),
+                vectorPoint[3]);
+        if (angle > 0f) {
+            return false;
+        }
+        angle = linesAngle(vectorPoint[2],
+                new PointF(vectorPoint[3].x, vectorPoint[3].y),
+                vectorPoint[0]);
+        if (angle > 0f) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         /**1、ACTION_DOWN：判断是否和端点的外接矩形相交
@@ -103,24 +144,10 @@ public class PhotoCutter extends View {
                                     && mVectorPoint[0].y + dy < mVectorPoint[3].y)) {
                                 return true;
                             }
-                            //不允许形成超过180度的角
-                            double angle = linesAngle(mVectorPoint[1],
-                                    new PointF(mVectorPoint[0].x + dx, mVectorPoint[0].y + dy),
-                                    mVectorPoint[3]);
-                            if (angle < 0f) {
-                                return true;
-                            }
                             break;
                         case 1:
                             if (!(mVectorPoint[1].x + dx > mVectorPoint[0].x && mVectorPoint[1].y + dy < mVectorPoint[2].y
                                     && mVectorPoint[1].y + dy < mVectorPoint[3].y)) {
-                                return true;
-                            }
-                            //不允许形成超过180度的角
-                            angle = linesAngle(mVectorPoint[0],
-                                    new PointF(mVectorPoint[1].x + dx, mVectorPoint[1].y + dy),
-                                    mVectorPoint[2]);
-                            if (angle > 0f) {
                                 return true;
                             }
                             break;
@@ -129,27 +156,18 @@ public class PhotoCutter extends View {
                                     && mVectorPoint[2].y + dy > mVectorPoint[1].y)) {
                                 return true;
                             }
-                            angle = linesAngle(mVectorPoint[1],
-                                    new PointF(mVectorPoint[2].x + dx, mVectorPoint[2].y + dy),
-                                    mVectorPoint[3]);
-                            if (angle > 0f) {
-                                return true;
-                            }
                             break;
                         case 3:
                             if (!(mVectorPoint[3].x + dx < mVectorPoint[2].x && mVectorPoint[3].y + dy > mVectorPoint[0].y
                                     && mVectorPoint[3].y + dy > mVectorPoint[1].y)) {
                                 return true;
                             }
-                            angle = linesAngle(mVectorPoint[2],
-                                    new PointF(mVectorPoint[3].x + dx, mVectorPoint[3].y + dy),
-                                    mVectorPoint[0]);
-                            if (angle > 0f) {
-                                return true;
-                            }
                             break;
                     }
-
+                    //检查角度是否符合要求
+                    if(!willAngleFit(dx, dy)) {
+                        return true;
+                    }
                     mTouchArea[mSelectedPoint].offset(dx, dy);
                     mVectorPoint[mSelectedPoint].offset(dx, dy);
                     invalidate();

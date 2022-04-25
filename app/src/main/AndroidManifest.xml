@@ -30,6 +30,8 @@
         </activity>
         <activity android:name="com.example.photoSelectorByRecycler.PicSelectorByRV">
         </activity>
+        <activity android:name="com.example.photoCutter.CutterActivity">
+        </activity>
         <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
