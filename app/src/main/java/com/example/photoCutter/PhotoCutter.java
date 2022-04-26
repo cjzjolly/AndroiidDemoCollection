@@ -4,10 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -40,6 +42,10 @@ public class PhotoCutter extends View {
     private PointF mPrevTouchPos = null;
     /**端点感知范围**/
     private int areaWidth = 200;
+    /**用户设置的端点**/
+    private PointF mVectorPointByUserSet[] = null;
+    /**用户裁剪的范围**/
+    private Path mCutterClipPath = null;
 
     public PhotoCutter(Context context) {
         super(context);
@@ -138,32 +144,32 @@ public class PhotoCutter extends View {
                         break;
                     }
                     //禁止越界导致线条交叉：
-                    switch (mSelectedPoint) {
-                        case 0:
-                            if (!(mVectorPoint[0].x + dx < mVectorPoint[1].x && mVectorPoint[0].y + dy < mVectorPoint[2].y
-                                    && mVectorPoint[0].y + dy < mVectorPoint[3].y)) {
-                                return true;
-                            }
-                            break;
-                        case 1:
-                            if (!(mVectorPoint[1].x + dx > mVectorPoint[0].x && mVectorPoint[1].y + dy < mVectorPoint[2].y
-                                    && mVectorPoint[1].y + dy < mVectorPoint[3].y)) {
-                                return true;
-                            }
-                            break;
-                        case 2:
-                            if (!(mVectorPoint[2].x + dx > mVectorPoint[3].x && mVectorPoint[2].y + dy > mVectorPoint[0].y
-                                    && mVectorPoint[2].y + dy > mVectorPoint[1].y)) {
-                                return true;
-                            }
-                            break;
-                        case 3:
-                            if (!(mVectorPoint[3].x + dx < mVectorPoint[2].x && mVectorPoint[3].y + dy > mVectorPoint[0].y
-                                    && mVectorPoint[3].y + dy > mVectorPoint[1].y)) {
-                                return true;
-                            }
-                            break;
-                    }
+//                    switch (mSelectedPoint) {
+//                        case 0:
+//                            if (!(mVectorPoint[0].x + dx < mVectorPoint[1].x && mVectorPoint[0].y + dy < mVectorPoint[2].y
+//                                    && mVectorPoint[0].y + dy < mVectorPoint[3].y)) {
+//                                return true;
+//                            }
+//                            break;
+//                        case 1:
+//                            if (!(mVectorPoint[1].x + dx > mVectorPoint[0].x && mVectorPoint[1].y + dy < mVectorPoint[2].y
+//                                    && mVectorPoint[1].y + dy < mVectorPoint[3].y)) {
+//                                return true;
+//                            }
+//                            break;
+//                        case 2:
+//                            if (!(mVectorPoint[2].x + dx > mVectorPoint[3].x && mVectorPoint[2].y + dy > mVectorPoint[0].y
+//                                    && mVectorPoint[2].y + dy > mVectorPoint[1].y)) {
+//                                return true;
+//                            }
+//                            break;
+//                        case 3:
+//                            if (!(mVectorPoint[3].x + dx < mVectorPoint[2].x && mVectorPoint[3].y + dy > mVectorPoint[0].y
+//                                    && mVectorPoint[3].y + dy > mVectorPoint[1].y)) {
+//                                return true;
+//                            }
+//                            break;
+//                    }
                     //检查角度是否符合要求
                     if(!willAngleFit(dx, dy)) {
                         return true;
@@ -192,7 +198,7 @@ public class PhotoCutter extends View {
             matrix.setTranslate(mWidth / 2f - mBitmap.getWidth() / 2f,
                     mHeight / 2f - mBitmap.getHeight() / 2f);
             matrix.postScale(mScale, mScale, mWidth / 2f, mHeight / 2f);
-            mSelectorRectPointPaint.setAlpha(100);
+            mSelectorRectPointPaint.setAlpha(50);
             canvas.drawBitmap(mBitmap, matrix, mSelectorRectPointPaint);
             mSelectorRectPointPaint.setAlpha(255);
 
@@ -222,6 +228,8 @@ public class PhotoCutter extends View {
                     //绘制选择器端点
                     canvas.drawCircle(pointF.x, pointF.y, 30, mSelectorRectPointPaint);
                 }
+                //记录这次的path
+                mCutterClipPath = new Path(path);
             }
         } else {
             Log.e(TAG, "图片为空");
@@ -229,9 +237,36 @@ public class PhotoCutter extends View {
     }
 
     private void init() {
-        //todo cjztest 随便找个图测试一下
-        mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.tree);
         areaWidth = (int) MeasurelUtils.convertDpToPixel(100, getContext());
+        resetView();
+    }
+
+    /**设置要显示的图片，并重置控件**/
+    public void setBitmap(Bitmap bitmap) {
+        if (null == bitmap || bitmap.isRecycled()) {
+            Log.e(TAG, "图片载入错误");
+            return;
+        }
+        mBitmap = bitmap;
+        resetView();
+    }
+
+    /**设置选择点**/
+    public void setSelectorPointOnPhoto(PointF leftTop, PointF rightTop,
+                                        PointF leftBottom, PointF rightBottom) {
+        //算出用户指定的在图片中点，在控件中已缩放后的相对位置
+        if (null == mBitmap || mBitmap.isRecycled()) {
+            Log.e(TAG, "setSelectorPointOnPhoto：图片空错误");
+            return;
+        }
+        mVectorPointByUserSet = new PointF[4];
+        mVectorPointByUserSet[0] = leftTop;
+        mVectorPointByUserSet[1] = rightTop;
+        mVectorPointByUserSet[2] = rightBottom;
+        mVectorPointByUserSet[3] = leftBottom;
+        Log.i("cjztest", String.format("左上:%f,%f, 右上:%f,%f, 左下:%f,%f, 右下:%f,%f", leftTop.x, leftTop.y, rightTop.x, rightTop.y,
+                leftBottom.x, leftBottom.y, rightBottom.x, rightBottom.y));
+        Log.i("cjztest", String.format("图片宽高%d, %d", mBitmap.getWidth(), mBitmap.getHeight()));
         resetView();
     }
 
@@ -241,7 +276,6 @@ public class PhotoCutter extends View {
         if (null != mBitmap && !mBitmap.isRecycled()) {
             int bmpW = mBitmap.getWidth();
             int bmpH = mBitmap.getHeight();
-            float bmpRatio = (float) bmpW / bmpH;
             //计算缩放率
             float ratioW = (float) bmpW / mWidth;
             float ratioH = (float) bmpH / mHeight;
@@ -269,6 +303,34 @@ public class PhotoCutter extends View {
                     mHeight / 2 + mBitmap.getHeight() / 2 * mScale);
             mVectorPoint[3] = new PointF(mWidth / 2 - mBitmap.getWidth() / 2 * mScale,
                     mHeight / 2 + mBitmap.getHeight() / 2 * mScale);
+            //如果有用户设置的触摸点，就根据设置改一下默认位置
+            if (null != mVectorPointByUserSet) {
+                PointF newLeftTop = new PointF();
+                PointF newRightTop = new PointF();
+                PointF newRightBottom = new PointF();
+                PointF newLeftBottom = new PointF();
+                newLeftTop.x = mVectorPoint[0].x + mVectorPointByUserSet[0].x * mScale;
+                newLeftTop.y = mVectorPoint[0].y + mVectorPointByUserSet[0].y * mScale;
+                newRightTop.x = mVectorPoint[1].x + (mVectorPointByUserSet[1].x - mBitmap.getWidth()) * mScale;
+                newRightTop.y = mVectorPoint[1].y + mVectorPointByUserSet[1].y * mScale;
+                newRightBottom.x = mVectorPoint[2].x + (mVectorPointByUserSet[2].x - mBitmap.getWidth()) * mScale;
+                newRightBottom.y = mVectorPoint[2].y + (mVectorPointByUserSet[2].y - mBitmap.getHeight()) * mScale;
+                newLeftBottom.x = mVectorPoint[3].x + mVectorPointByUserSet[3].x * mScale;
+                newLeftBottom.y = mVectorPoint[3].y + (mVectorPointByUserSet[3].y - mBitmap.getHeight()) * mScale;
+                //添加一下位置检查，否则如果传入的值不对会干扰代码逻辑
+                if (!(newLeftTop.x < mVectorPoint[0].x || newLeftTop.y < mVectorPoint[0].y)) {
+                    mVectorPoint[0] = newLeftTop;
+                }
+                if (!(newRightTop.x > mVectorPoint[1].x || newRightTop.y < mVectorPoint[1].y)) {
+                    mVectorPoint[1] = newRightTop;
+                }
+                if (!(newRightBottom.x > mVectorPoint[2].x || newRightBottom.y > mVectorPoint[2].y)) {
+                    mVectorPoint[2] = newRightBottom;
+                }
+                if (!(newLeftBottom.x < mVectorPoint[3].x || newLeftBottom.y > mVectorPoint[3].y)) {
+                    mVectorPoint[3] = newLeftBottom;
+                }
+            }
             mTouchArea[0] = new RectF(mVectorPoint[0].x - areaWidth / 2, mVectorPoint[0].y - areaWidth / 2,
                     mVectorPoint[0].x + areaWidth / 2, mVectorPoint[0].y + areaWidth / 2);
             mTouchArea[1] = new RectF(mVectorPoint[1].x - areaWidth / 2, mVectorPoint[1].y - areaWidth / 2,
@@ -294,5 +356,44 @@ public class PhotoCutter extends View {
             init();
         }
         invalidate();
+    }
+
+    public Bitmap cutPhoto() {
+        if (null == mBitmap || mBitmap.isRecycled()) {
+            Log.e(TAG, "当前没有图片");
+            return null;
+        }
+        if (null == mVectorPoint) {
+            Log.e(TAG, "当前没有初始化选择点");
+            return null;
+        }
+        if (null == mCutterClipPath) {
+            Log.e(TAG, "当前没有用户裁剪path");
+            return null;
+        }
+        //算出裁剪框的裁剪范围的外接矩形:
+        float left = Math.min(mVectorPoint[0].x, mVectorPoint[3].x);
+        float top = Math.min(mVectorPoint[0].y, mVectorPoint[1].y);
+        float right = Math.max(mVectorPoint[1].x, mVectorPoint[2].x);
+        float bottom = Math.max(mVectorPoint[2].y, mVectorPoint[3].y);
+        Rect rect = new Rect((int) left, (int) top, (int) right, (int) bottom);
+        Bitmap bitmap = Bitmap.createBitmap((int) (rect.width() * (1f / mScale)), (int) (rect.height() * (1f / mScale)), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+//        canvas.translate((int) (-left * (1f / mScale)), (int) (-top * (1f / mScale))); //抵消位移
+        //画布挖洞
+        Matrix pathMatrix = new Matrix();
+        pathMatrix.setTranslate(-left, -top); //以画布为静止参考系，那么反向数值移动即可抵消位移
+        pathMatrix.postScale(1f / mScale, 1f / mScale);
+        mCutterClipPath.transform(pathMatrix); //todo 小心资源冲突
+        canvas.drawColor(Color.BLACK);
+        canvas.clipPath(mCutterClipPath);
+        canvas.drawColor(Color.RED);
+        //绘制图片
+        Matrix bmpMatrix = new Matrix();
+        //重点:因为传入的top值是外接矩形在控件中的位置，因此必须先减去里面包含的控件的高度相关的数量，否则位置会有所偏差
+        bmpMatrix.setTranslate((int) (-left * (1f / mScale)),
+                -(top - (mHeight / 2f - mBitmap.getHeight() / 2f * mScale)) * (1f / mScale));
+        canvas.drawBitmap(mBitmap, bmpMatrix, null);
+        return bitmap;
     }
 }
