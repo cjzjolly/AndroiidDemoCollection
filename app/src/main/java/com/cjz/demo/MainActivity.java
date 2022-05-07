@@ -17,6 +17,7 @@ import com.example.photoCutter.CutterActivity;
 import com.example.photoSelector.PhotoSelectorPageActivity;
 import com.example.photoSelectorByRecycler.PicSelectorByRV;
 import com.example.picCutview.PicCutActivity;
+import com.example.sidingMenuRecyclerView.SlideRecyclerViewActivity;
 
 public class MainActivity extends Activity {
 
@@ -84,5 +85,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, CutterActivity.class));
         });
         linearLayoutContainer.addView(photoCutterBtn);
+        //侧滑菜单recyclerView：
+        Button sidingMenuBtn = new Button(this);
+        sidingMenuBtn.setText("侧滑菜单recyclerView");
+        sidingMenuBtn.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, SlideRecyclerViewActivity.class));
+        });
+        linearLayoutContainer.addView(sidingMenuBtn);
     }
 }
