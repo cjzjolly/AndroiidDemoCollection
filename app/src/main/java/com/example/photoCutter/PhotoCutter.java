@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -46,6 +47,8 @@ public class PhotoCutter extends View {
     private PointF mVectorPointByUserSet[] = null;
     /**用户裁剪的范围**/
     private Path mCutterClipPath = null;
+    /**当前触摸事件**/
+    private int mCurrentAction = MotionEvent.ACTION_UP;
 
     public PhotoCutter(Context context) {
         super(context);
@@ -116,6 +119,7 @@ public class PhotoCutter extends View {
         /**1、ACTION_DOWN：判断是否和端点的外接矩形相交
          * 2、ACTION_MOVE：端点值加上偏移值
          * **/
+        mCurrentAction = event.getAction();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (event.getPointerCount() > 1) {
@@ -183,6 +187,7 @@ public class PhotoCutter extends View {
             case MotionEvent.ACTION_UP:
                 mSelectedPoint = -1;
                 mPrevTouchPos = null;
+                invalidate();
                 break;
         }
         return true;
@@ -198,7 +203,7 @@ public class PhotoCutter extends View {
             matrix.setTranslate(mWidth / 2f - mBitmap.getWidth() / 2f,
                     mHeight / 2f - mBitmap.getHeight() / 2f);
             matrix.postScale(mScale, mScale, mWidth / 2f, mHeight / 2f);
-            mSelectorRectPointPaint.setAlpha(50);
+            mSelectorRectPointPaint.setAlpha(150);
             canvas.drawBitmap(mBitmap, matrix, mSelectorRectPointPaint);
             mSelectorRectPointPaint.setAlpha(255);
 
@@ -230,6 +235,38 @@ public class PhotoCutter extends View {
                 }
                 //记录这次的path
                 mCutterClipPath = new Path(path);
+                //绘制局部放大图
+                if (null == mVectorPoint || mSelectedPoint < 0 || mSelectedPoint >= mVectorPoint.length) {
+                    return;
+                }
+                PointF selectPoint = mVectorPoint[mSelectedPoint];
+                if (null != selectPoint && MotionEvent.ACTION_UP != mCurrentAction) {
+                    Path scopeArea = new Path();
+                    int w = (int) MeasurelUtils.convertDpToPixel(100, getContext());
+                    int h = (int) MeasurelUtils.convertDpToPixel(100, getContext());
+                    //手指碰到绘制区域要避开
+                    RectF rect = new RectF(0, 0, w, h);
+                    if (rect.contains(selectPoint.x, selectPoint.y)) {
+                        rect = new RectF(mWidth - w, 0, mWidth, h);
+                    }
+                    scopeArea.addRoundRect(rect, 10f, 10f,
+                            Path.Direction.CCW);
+                    canvas.save();
+                    canvas.clipPath(scopeArea);
+                    float offsetX = ((mWidth - mBitmap.getWidth() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
+                    Point point = new Point((int) ((selectPoint.x - offsetX) * (1f / mScale)),
+                            (int) ((selectPoint.y - (mHeight / 2f - mBitmap.getHeight() / 2f * mScale)) * (1f / mScale)));
+                    Matrix scopeMatrix = new Matrix();
+                    scopeMatrix.postScale(mScale * 2f, mScale * 2f, (point.x + w / 2), (point.y + h / 2));
+                    scopeMatrix.setTranslate((-point.x + w / 2), (-point.y + h / 2));
+                    canvas.drawColor(Color.BLACK);
+                    canvas.drawBitmap(mBitmap, scopeMatrix, null);
+                    mSelectorRectPointPaint.setStyle(Paint.Style.STROKE);
+                    canvas.drawPath(scopeArea, mSelectorRectPointPaint);
+                    canvas.drawLine(rect.centerX() - w / 10, rect.centerY(), rect.centerX() + w / 10, rect.centerY(), mSelectorRectPointPaint);
+                    canvas.drawLine(rect.centerX(), rect.centerY() - w / 10, rect.centerX(), rect.centerY() + w / 10, mSelectorRectPointPaint);
+                    canvas.restore();
+                }
             }
         } else {
             Log.e(TAG, "图片为空");
@@ -264,9 +301,9 @@ public class PhotoCutter extends View {
         mVectorPointByUserSet[1] = rightTop;
         mVectorPointByUserSet[2] = rightBottom;
         mVectorPointByUserSet[3] = leftBottom;
-        Log.i("cjztest", String.format("左上:%f,%f, 右上:%f,%f, 左下:%f,%f, 右下:%f,%f", leftTop.x, leftTop.y, rightTop.x, rightTop.y,
-                leftBottom.x, leftBottom.y, rightBottom.x, rightBottom.y));
-        Log.i("cjztest", String.format("图片宽高%d, %d", mBitmap.getWidth(), mBitmap.getHeight()));
+        //Log.i("cjztest", String.format("左上:%f,%f, 右上:%f,%f, 左下:%f,%f, 右下:%f,%f", leftTop.x, leftTop.y, rightTop.x, rightTop.y,
+        //        leftBottom.x, leftBottom.y, rightBottom.x, rightBottom.y));
+        //Log.i("cjztest", String.format("图片宽高%d, %d", mBitmap.getWidth(), mBitmap.getHeight()));
         resetView();
     }
 
@@ -292,7 +329,7 @@ public class PhotoCutter extends View {
         mSelectorRectPointPaint.setAntiAlias(true);
         mSelectorRectPointPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         mSelectorRectPointPaint.setStrokeWidth(6);
-        mSelectorRectPointPaint.setColor(0xFF5555FF);
+        mSelectorRectPointPaint.setColor(0xFF5588FF);
         if (null != mBitmap && !mBitmap.isRecycled()) {
             //顺时政赋值一圈
             mVectorPoint[0] = new PointF(mWidth / 2 - mBitmap.getWidth() / 2 * mScale,
