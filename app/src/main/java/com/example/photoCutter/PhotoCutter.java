@@ -409,9 +409,10 @@ public class PhotoCutter extends View {
             return null;
         }
         //算出裁剪框的裁剪范围的外接矩形:
-        float left = Math.min(mVectorPoint[0].x, mVectorPoint[3].x);
+        float offsetX = ((mWidth - mBitmap.getWidth() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
+        float left = Math.min(mVectorPoint[0].x - offsetX, mVectorPoint[3].x);
         float top = Math.min(mVectorPoint[0].y, mVectorPoint[1].y);
-        float right = Math.max(mVectorPoint[1].x, mVectorPoint[2].x);
+        float right = Math.max(mVectorPoint[1].x - offsetX, mVectorPoint[2].x);
         float bottom = Math.max(mVectorPoint[2].y, mVectorPoint[3].y);
         Rect rect = new Rect((int) left, (int) top, (int) right, (int) bottom);
         Bitmap bitmap = Bitmap.createBitmap((int) (rect.width() * (1f / mScale)), (int) (rect.height() * (1f / mScale)), Bitmap.Config.ARGB_8888);
