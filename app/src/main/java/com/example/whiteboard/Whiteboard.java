@@ -25,7 +25,7 @@ public class Whiteboard extends View {
     private int mHeight = -1;
     private float dx = 0, dy = 0;
     /**缩放比例上限**/
-    private final float MAX_SCALE = 4f;
+    public static final float MAX_SCALE = 4f;
     /**缩放比例下限**/
     private final float MIN_SCALE = 0.5f;
     private final int MATRIX_LENGTH = 8;
@@ -166,21 +166,7 @@ public class Whiteboard extends View {
         for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit mapUnit = mapUnitMatrix[xPos][yPos];
-                //以本View中心点为缩放中心缩放
-//                view.setScaleX(view.getScaleX() * scale);
-//                view.setScaleY(view.getScaleY() * scale);
                 mapUnit.scale(scale);
-                //求本view中心点在屏幕中的坐标
-//                float centerX = view.getX() + view.getWidth() / 2;
-//                float centerY = view.getY() + view.getHeight() / 2;
-                /**向缩放中心靠拢，例如缩放为原来的80%，那么缩放中心x到view中心x的距离则为0.8*(缩放中心x - view中心x),
-                 * 那么view的x距离屏幕左边框的距离则 为   view中心x + (1 - 0.8) * (缩放x - view中心x)  ****/
-//                float centerXAfterScale = centerX + (px - centerX) * (1 - scale); //view中心向缩放中心聚拢或扩散
-//                float centerYAfterScale = centerY + (py - centerY) * (1 - scale);
-//                view.setX(centerXAfterScale - view.getWidth() / 2); //setXY是set左上角的x,y，所以view中心点要减去宽度/高度的一般来重新得到应该去的左上角坐标
-//                view.setY(centerYAfterScale - view.getHeight() / 2);
-//            viewFind(view, this.scale);
-//                Log.i("View" + view.hashCode() + "的信息", String.format("长度:%d, 宽度:%d, 坐标x:%f, 坐标y:%f", view.getWidth(), view.getHeight(), view.getX(), view.getY()));
             }
         }
         Log.i("缩放", String.format("百分比：%f", totalScale));

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -25,6 +26,9 @@ public class DrawView extends View {
     /**当前绘制画布**/
     private Canvas mCanvas;
 
+    /**瓦片载体高清画布**/
+    private Canvas mCanvasScale;
+
     /**进行过初始化了吗**/
     private boolean isInitFinished = false;
 
@@ -35,7 +39,10 @@ public class DrawView extends View {
     private int mWidth, mHeight;
 
     /**当前绘制画布**/
-    private Bitmap canvasBitmap;
+    private Bitmap mCanvasBitmap;
+
+    /**瓦片载体高清画布**/
+    private Bitmap mCanvasScaleBitmap;
 
     /**是否绘制触摸**/
     private boolean isShowTouchEvent = true;
@@ -48,6 +55,9 @@ public class DrawView extends View {
     /**当前正在绘制的线条组合**/
     private Map<Integer, Curv> currentDrawingMap = new HashMap<>();
 
+    /**位图放大倍数**/
+    private float mMaxScale = 1f;
+
     public DrawView(Context context) {
         super(context);
     }
@@ -58,6 +68,11 @@ public class DrawView extends View {
 
     public DrawView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+    }
+
+    /**设置画布所依赖的位图放大的倍数，使用瓦片载体的最大缩放倍数即可，这样瓦片位图的碎片就是从最高分辨率的图中获取的，这样缩小还是放大都不会模糊了**/
+    public void setBitmapScale(float maxScale) {
+        this.mMaxScale = maxScale;
     }
 
     @Override
@@ -73,8 +88,10 @@ public class DrawView extends View {
             int height = MeasureSpec.getSize(heightMeasureSpec);
             mWidth = width;
             mHeight = height;
-            canvasBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
-            mCanvas = new Canvas(canvasBitmap);
+            mCanvasBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
+            mCanvas = new Canvas(mCanvasBitmap);
+            mCanvasBitmap = Bitmap.createBitmap((int) (mWidth * mMaxScale), (int) (mHeight * mMaxScale), Bitmap.Config.ARGB_8888);
+            mCanvasScale = new Canvas(mCanvasBitmap);
             isInitFinished = true;
         }
     }
@@ -107,6 +124,10 @@ public class DrawView extends View {
                 Paint paint = makePaint();
                 mCurrentCurv = new Curv(paint);
                 mCurrentCurv.draw(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()), event.getAction(), mCanvas);
+//                mCanvasScale.save();
+//                mCanvasScale.scale(1f / mMaxScale, 1f / mMaxScale);
+//                mCurrentCurv.draw(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()), event.getAction(), mCanvasScale);
+//                mCanvasScale.restore();
                 currentDrawingMap.put(id, mCurrentCurv);
                 break;
             }
@@ -132,6 +153,7 @@ public class DrawView extends View {
             }
             case MotionEvent.ACTION_UP: {
                 int id = event.getPointerId(event.getActionIndex());
+                mCanvasScale.scale(1f / mMaxScale, 1f);
                 currentDrawingMap.remove(id);
                 break;
             }
@@ -154,22 +176,26 @@ public class DrawView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        canvas.drawBitmap(canvasBitmap, 0, 0, null);
-        if (isShowTouchEvent) {
-            //顺便随手写个多行文本框示例
-            float fontSize = 20f;
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setAntiAlias(true);
-            paint.setColor(Color.RED);
-            paint.setStrokeWidth(1f);
-            paint.setTextSize(fontSize);
-            //显示触摸事件
-            String eventStr[] = touchEventStringBuffer.toString().split("\n");
-            for(int i = 0; i < eventStr.length; i++){
-                canvas.drawText(eventStr[i], 0, fontSize * (i + 1), paint);
-            }
-            touchEventStringBuffer = new StringBuffer();
-        }
+//        canvas.scale(1f / mMaxScale, 1f / mMaxScale);
+//        canvas.drawBitmap(mCanvasBitmap, 0, 0, null);
+        Matrix matrix = new Matrix();
+        matrix.setScale(1f, 1f);
+        canvas.drawBitmap(mCanvasBitmap, matrix, null);
+//        if (isShowTouchEvent) {
+//            //顺便随手写个多行文本框示例
+//            float fontSize = 20f;
+//            Paint paint = new Paint();
+//            paint.setStyle(Paint.Style.STROKE);
+//            paint.setAntiAlias(true);
+//            paint.setColor(Color.RED);
+//            paint.setStrokeWidth(1f);
+//            paint.setTextSize(fontSize);
+//            //显示触摸事件
+//            String eventStr[] = touchEventStringBuffer.toString().split("\n");
+//            for(int i = 0; i < eventStr.length; i++){
+//                canvas.drawText(eventStr[i], 0, fontSize * (i + 1), paint);
+//            }
+//            touchEventStringBuffer = new StringBuffer();
+//        }
     }
 }
