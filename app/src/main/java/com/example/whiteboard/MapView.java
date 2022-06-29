@@ -62,8 +62,14 @@ public class MapView extends View {
     }
 
     private void createUnits() {
-        int unitWidth = (int) (mWidth / MATRIX_LENGTH / MIN_SCALE);
-        int unitHeight = (int) (mHeight / MATRIX_LENGTH / MIN_SCALE);
+        int longEdge = mWidth;
+        if (mHeight > mWidth) {
+            longEdge = mHeight;
+        }
+        int unitWidth = (int) (longEdge / MATRIX_LENGTH / MIN_SCALE);
+        int unitHeight = (int) (longEdge / MATRIX_LENGTH / MIN_SCALE);
+        unitWidth += unitWidth / 2;
+        unitHeight += unitHeight / 2;
         for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 RectF unitRange = new RectF(0, 0, unitWidth, unitHeight);
@@ -261,7 +267,7 @@ public class MapView extends View {
                 if (mapUnit == null) {
                     continue;
                 }
-                //todo 如果和可见区域不相交，就不显示了
+                //如果和可见区域不相交，就不显示了
                 if (null == mapUnit.getRange() ||
                         !mapViewRange.intersects(mapUnit.getRange().left, mapUnit.getRange().top, mapUnit.getRange().right, mapUnit.getRange().bottom)) {
                     continue;

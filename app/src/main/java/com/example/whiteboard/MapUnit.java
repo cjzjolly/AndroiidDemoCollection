@@ -30,9 +30,9 @@ public class MapUnit {
         mMapRange = new RectF(range);
         Random random = new Random();
         mPaint = new Paint();
-        mPaint.setStrokeWidth(8f);
+        mPaint.setStrokeWidth(2f);
         mPaint.setColor((0xFF000000 | (random.nextInt(255) & 0xFF) << 16 | (random.nextInt(255) & 0xFF) << 8 | (random.nextInt(255) & 0xFF)));
-        mPaint.setStyle(Paint.Style.FILL);
+        mPaint.setStyle(Paint.Style.STROKE);
         this.mMaxScale = maxScale;
         setTag(tag);
         //todo 创建载体位图，以后从外存中读写，暂时先用内存里面建立的作为测试:
@@ -146,16 +146,16 @@ public class MapUnit {
         }
         Log.i("onDraw", hashCode() + "");
         //绘制随机色背景
-//        canvas.drawRect(mMapRange, mPaint);
+        canvas.drawRect(mMapRange, mPaint);
         //按照缩放率，减少要绘制的像素量
-        if (mFastCacheBmp == null && mTileBitmap != null) {
+        if (mFastCacheBmp == null && mTileBitmap != null && mScale < 2f) { //缩放率足够大的时候，显示瓦片数很少，没必要做缩略图了
             int w = (int) mMapRange.width();
             int h = (int) mMapRange.height();
+            //使用2的倍数提升缩略图质量
             mFastCacheBmp = Bitmap.createScaledBitmap(mTileBitmap,  w + (w % 2 == 0 ? 0 : 1), h + (h % 2 == 0 ? 0 : 1), true);
-//            MapImageManager.saveTileImage(getTag(), mTileBitmap, mScale);
         }
         //绘制内容中应放到瓦片的部分
-        if (mFastCacheBmp != null) {
+        if (mFastCacheBmp != null && mScale < 2f) {
             canvas.drawBitmap(mFastCacheBmp, new Rect(0, 0, mFastCacheBmp.getWidth(), mFastCacheBmp.getHeight()),
                     mMapRange, null);
         } else {
@@ -170,7 +170,7 @@ public class MapUnit {
         paintPen.setTextSize(20f);
         paintPen.setAntiAlias(true);
         //绘制自己是第几列第几行的单元
-        if(mUnitXY != null) {
+        if (mUnitXY != null) {
             int position[] = mUnitXY;
             canvas.drawText(String.format("UnitX: %d, UnitY: %d", position[0], position[1]),  mMapRange.centerX() - 40, mMapRange.centerY(), paintPen);
         }
