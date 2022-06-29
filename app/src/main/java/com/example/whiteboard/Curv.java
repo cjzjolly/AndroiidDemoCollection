@@ -1,7 +1,6 @@
 package com.example.whiteboard;
 
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
@@ -13,8 +12,6 @@ import android.view.MotionEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.microedition.khronos.opengles.GL10;
 
 /**
  *  曲线容器，一个容器的曲线>=1
@@ -47,7 +44,7 @@ public class Curv/* extends BaseShape*/ {
     private float width = 2 / 3.3f;
 
     private boolean isStart = false;
-    public Path totalPath;
+    public Path mTotalPath;
     private Path drawPath;
 
     private void init() {
@@ -57,8 +54,8 @@ public class Curv/* extends BaseShape*/ {
         mid = new PointF();
         end = new PointF();
         range = new RectF();
-        totalPath = new Path();
-        pathList.add(totalPath);
+        mTotalPath = new Path();
+        pathList.add(mTotalPath);
     }
 
     public boolean isStart() {
@@ -126,7 +123,7 @@ public class Curv/* extends BaseShape*/ {
         if(!isStart()) {
             setCurrentRaw(x, y, action);
 
-            totalPath.moveTo(x, y);
+            mTotalPath.moveTo(x, y);
 //            if(!isBuildPathAllDoing)
             touchPointList.add(new PointF(x, y));
             segPathList.add(new Path());
@@ -165,21 +162,21 @@ public class Curv/* extends BaseShape*/ {
             double s = Math.sqrt(Math.pow(x - cx, 2) + Math.pow(y - cy, 2));
             if (action == MotionEvent.ACTION_UP){
                 drawPath.lineTo(x,y);
-                totalPath.lineTo(x, y);
+                mTotalPath.lineTo(x, y);
             } else {
                 if (s < 200) {
                     if (s < 2) {//1.10 //2.12 //3.15
                         drawPath.cubicTo(cx, cy, midX, midY, x, y);
-                        totalPath.cubicTo(cx, cy, midX, midY, x, y);
+                        mTotalPath.cubicTo(cx, cy, midX, midY, x, y);
                         System.out.println("cubicTo");
                     } else {
                         drawPath.quadTo(cx, cy, midX, midY);
-                        totalPath.quadTo(cx, cy, midX, midY);
+                        mTotalPath.quadTo(cx, cy, midX, midY);
 //                    System.out.println("quadTo");
                     }
                 } else {
                     drawPath.quadTo(cx, cy, midX, midY);
-                    totalPath.quadTo(cx, cy, midX, midY);
+                    mTotalPath.quadTo(cx, cy, midX, midY);
                 }
             }
             canvas.drawPath(segPathList.get(segPathList.size() - 1), paint);
@@ -209,15 +206,19 @@ public class Curv/* extends BaseShape*/ {
 //            }
 //        }
         if(action == MotionEvent.ACTION_UP) {
-            if(totalPath != null && paint != null){
-                PathMeasure pathMeasure = new PathMeasure(totalPath, false);
+            if(mTotalPath != null && paint != null){
+                PathMeasure pathMeasure = new PathMeasure(mTotalPath, false);
                 if(pathMeasure.getLength() < 2f){
                     paint.setStyle(Paint.Style.FILL);
-                    totalPath = new Path();
-                    totalPath.addCircle(x + paint.getStrokeWidth() / 2f, y + paint.getStrokeWidth() / 2f, paint.getStrokeWidth() / 2f, Path.Direction.CCW);
-                    canvas.drawPath(totalPath, paint);
+                    mTotalPath = new Path();
+                    mTotalPath.addCircle(x + paint.getStrokeWidth() / 2f, y + paint.getStrokeWidth() / 2f, paint.getStrokeWidth() / 2f, Path.Direction.CCW);
+                    canvas.drawPath(mTotalPath, paint);
                 }
             }
         }
+    }
+
+    public Path getTotalPath() {
+        return mTotalPath;
     }
 }

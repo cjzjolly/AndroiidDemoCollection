@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -78,27 +79,30 @@ public class DrawView extends View {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        if(!isInitFinished){
-            rootPath = getContext().getFilesDir().getAbsolutePath()  + File.separatorChar + "drawView";
+        if (!isInitFinished) {
+            rootPath = getContext().getFilesDir().getAbsolutePath() + File.separatorChar + "drawView";
             File rootDir = new File(rootPath);
             if(!rootDir.exists()){
                 rootDir.mkdir();
             }
             int width = MeasureSpec.getSize(widthMeasureSpec);
             int height = MeasureSpec.getSize(heightMeasureSpec);
+            if (width == 0 || height == 0) {
+                return;
+            }
             mWidth = width;
             mHeight = height;
             mCanvasBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mCanvasBitmap);
-            mCanvasBitmap = Bitmap.createBitmap((int) (mWidth * mMaxScale), (int) (mHeight * mMaxScale), Bitmap.Config.ARGB_8888);
-            mCanvasScale = new Canvas(mCanvasBitmap);
+            mCanvasScaleBitmap = Bitmap.createBitmap((int) (mWidth * mMaxScale), (int) (mHeight * mMaxScale), Bitmap.Config.ARGB_8888);
+            mCanvasScale = new Canvas(mCanvasScaleBitmap);
             isInitFinished = true;
         }
     }
 
 
     /**获取绘制笔**/
-    private Paint makePaint(){
+    private Paint makePaint() {
         Paint paint = new Paint();
         paint.setStrokeWidth(12f);
         paint.setStyle(Paint.Style.STROKE);
@@ -116,6 +120,7 @@ public class DrawView extends View {
     /**书写**/
     private void penDraw(MotionEvent event) {
         int actionType = event.getAction() & MotionEvent.ACTION_MASK;
+
         switch (actionType){
             case MotionEvent.ACTION_POINTER_DOWN: {
                 Log.i("penDraw_AT", "MotionEvent.ACTION_POINTER_DOWN");
@@ -124,10 +129,6 @@ public class DrawView extends View {
                 Paint paint = makePaint();
                 mCurrentCurv = new Curv(paint);
                 mCurrentCurv.draw(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()), event.getAction(), mCanvas);
-//                mCanvasScale.save();
-//                mCanvasScale.scale(1f / mMaxScale, 1f / mMaxScale);
-//                mCurrentCurv.draw(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()), event.getAction(), mCanvasScale);
-//                mCanvasScale.restore();
                 currentDrawingMap.put(id, mCurrentCurv);
                 break;
             }
@@ -151,14 +152,25 @@ public class DrawView extends View {
                 }
                 break;
             }
-            case MotionEvent.ACTION_UP: {
-                int id = event.getPointerId(event.getActionIndex());
-                mCanvasScale.scale(1f / mMaxScale, 1f);
-                currentDrawingMap.remove(id);
-                break;
-            }
+            case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP: {
                 int id = event.getPointerId(event.getActionIndex());
+
+
+                Curv curv = (Curv) currentDrawingMap.get(id);
+                if (curv != null) {
+                    Path path = curv.getTotalPath();
+                    Paint paint = curv.paint;
+                    if (path != null && paint != null) {
+                        mCanvasScale.save();
+                        mCanvasScale.scale(mMaxScale, mMaxScale);
+                        mCanvasScale.drawPath(path, curv.paint);
+                        mCanvasScale.restore();
+                    }
+                }
+
+
+
                 currentDrawingMap.remove(id);
                 break;
             }
@@ -176,26 +188,29 @@ public class DrawView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-//        canvas.scale(1f / mMaxScale, 1f / mMaxScale);
-//        canvas.drawBitmap(mCanvasBitmap, 0, 0, null);
-        Matrix matrix = new Matrix();
-        matrix.setScale(1f, 1f);
-        canvas.drawBitmap(mCanvasBitmap, matrix, null);
-//        if (isShowTouchEvent) {
-//            //顺便随手写个多行文本框示例
-//            float fontSize = 20f;
-//            Paint paint = new Paint();
-//            paint.setStyle(Paint.Style.STROKE);
-//            paint.setAntiAlias(true);
-//            paint.setColor(Color.RED);
-//            paint.setStrokeWidth(1f);
-//            paint.setTextSize(fontSize);
-//            //显示触摸事件
-//            String eventStr[] = touchEventStringBuffer.toString().split("\n");
-//            for(int i = 0; i < eventStr.length; i++){
-//                canvas.drawText(eventStr[i], 0, fontSize * (i + 1), paint);
-//            }
-//            touchEventStringBuffer = new StringBuffer();
-//        }
+        canvas.drawBitmap(mCanvasBitmap, 0, 0, null);
+
+    //测试方法位图的绘制效果：
+//        Matrix matrix = new Matrix();
+//        matrix.setScale(1f / mMaxScale, 1f / mMaxScale);
+//        canvas.drawBitmap(mCanvasScaleBitmap, matrix, null);
+
+
+        if (isShowTouchEvent) {
+            //顺便随手写个多行文本框示例
+            float fontSize = 20f;
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setAntiAlias(true);
+            paint.setColor(Color.RED);
+            paint.setStrokeWidth(1f);
+            paint.setTextSize(fontSize);
+            //显示触摸事件
+            String eventStr[] = touchEventStringBuffer.toString().split("\n");
+            for(int i = 0; i < eventStr.length; i++){
+                canvas.drawText(eventStr[i], 0, fontSize * (i + 1), paint);
+            }
+            touchEventStringBuffer = new StringBuffer();
+        }
     }
 }

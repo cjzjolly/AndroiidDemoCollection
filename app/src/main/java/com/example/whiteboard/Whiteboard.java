@@ -107,14 +107,14 @@ public class Whiteboard extends View {
                 for(int i = 0; i < event.getPointerCount(); i++){
                     avergeX += event.getX(i);
                     avergeY += event.getY(i);
-                    if(i + 1 < event.getPointerCount()){
+                    if (i + 1 < event.getPointerCount()) {
                         nowDistance += Math.sqrt(Math.pow(event.getX(i + 1) - event.getX(i), 2) + Math.pow(event.getY(i + 1) - event.getY(i), 2));
                     }
                 }
                 //现在的点间距离 除以 上次点间距离 这次得到缩放比例
                 avergeX /= event.getPointerCount();
                 avergeY /= event.getPointerCount();
-                if((prevPointCount != event.getPointerCount()) || event.getPointerCount() <= 1 || prevPointCount <= 1){ //触摸点数突然改变 或者 触摸点不超过2，不允许缩放
+                if ((prevPointCount != event.getPointerCount()) || event.getPointerCount() <= 1 || prevPointCount <= 1) { //触摸点数突然改变 或者 触摸点不超过2，不允许缩放
                     prevDistance = nowDistance = 0;
                 }
                 //如果缩放数据有效，则进行平均平滑化并且进行缩放
@@ -252,6 +252,7 @@ public class Whiteboard extends View {
         if (null == mapUnitMatrix) {
             return;
         }
+        /**遍历所有瓦片并进行绘制**/
         for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit mapUnit = mapUnitMatrix[xPos][yPos];
