@@ -1,6 +1,7 @@
 package com.example.whiteboard;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.PointF;
 import android.graphics.RectF;
@@ -16,7 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * Created by cjz on 2019/4/30.
  */
 
-public class Whiteboard extends View {
+public class MapView extends View {
     private PointF currentCenter = new PointF();
     private PointF prevCurrentCenter = null;
     private float prevDistance = Float.MIN_VALUE;
@@ -35,16 +36,16 @@ public class Whiteboard extends View {
     /*** 触摸点点距队列**/
     private Queue<Float> touchDistanceQueue = new LinkedBlockingQueue<>();
 
-    public Whiteboard(Context context) {
+    public MapView(Context context) {
         super(context);
     }
 
-    public Whiteboard(Context context, AttributeSet attrs) {
+    public MapView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
     }
 
-    public Whiteboard(Context context, AttributeSet attrs, int defStyleAttr) {
+    public MapView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -67,7 +68,7 @@ public class Whiteboard extends View {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 RectF unitRange = new RectF(0, 0, unitWidth, unitHeight);
                 unitRange.offset(xPos * unitWidth, yPos * unitHeight);
-                MapUnit mapUnit = new MapUnit(unitRange);
+                MapUnit mapUnit = new MapUnit(unitRange, MAX_SCALE);
                 mapUnit.setTag(new int[]{xPos, yPos});
                 mapUnitMatrix[xPos][yPos] = mapUnit;
             }
@@ -252,6 +253,7 @@ public class Whiteboard extends View {
         if (null == mapUnitMatrix) {
             return;
         }
+        RectF mapViewRange = new RectF(0, 0, mWidth, mHeight);
         /**遍历所有瓦片并进行绘制**/
         for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
@@ -259,7 +261,25 @@ public class Whiteboard extends View {
                 if (mapUnit == null) {
                     continue;
                 }
+                //todo 如果和可见区域不相交，就不显示了
+                if (null == mapUnit.getRange() ||
+                        !mapViewRange.intersects(mapUnit.getRange().left, mapUnit.getRange().top, mapUnit.getRange().right, mapUnit.getRange().bottom)) {
+                    continue;
+				}
                 mapUnit.onDraw(canvas);
+            }
+        }
+    }
+
+    /**todo 把当前的绘制内容分割并叠加到瓦片中去**/
+    public void drawBmp(Bitmap contentBmp) {
+        for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
+            for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
+                MapUnit mapUnit = mapUnitMatrix[xPos][yPos];
+                if (mapUnit == null) {
+                    continue;
+                }
+                mapUnit.drawBmp(contentBmp);
             }
         }
     }

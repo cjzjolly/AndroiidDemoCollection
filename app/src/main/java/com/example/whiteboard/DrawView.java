@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -59,6 +60,18 @@ public class DrawView extends View {
     /**位图放大倍数**/
     private float mMaxScale = 1f;
 
+    /**瓦片地图载体**/
+    private MapView mMapView;
+
+    /**功能选择**/
+    public enum FuntionKind {
+        DRAW,
+        MOVE_AND_SCALE
+    }
+
+    /**当前选择的绘制模式**/
+    private FuntionKind mCurrentFunChoice = FuntionKind.DRAW;
+
     public DrawView(Context context) {
         super(context);
     }
@@ -98,6 +111,11 @@ public class DrawView extends View {
             mCanvasScale = new Canvas(mCanvasScaleBitmap);
             isInitFinished = true;
         }
+    }
+
+
+    public void setMapView(MapView mapView) {
+        this.mMapView = mapView;
     }
 
 
@@ -177,17 +195,48 @@ public class DrawView extends View {
         }
     }
 
+    /**功能选择**/
+    public void funChoice(FuntionKind funtionKind) {
+        mCurrentFunChoice = funtionKind;
+        switch (funtionKind) {
+            case DRAW:
+                invalidate();
+                break;
+            case MOVE_AND_SCALE:
+                if (mMapView == null || mCanvasScaleBitmap == null) {
+                    return;
+                }
+                mMapView.drawBmp(mCanvasScaleBitmap);
+                mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                mCanvasScale.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                invalidate();
+                break;
+        }
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         Log.i(getClass().getName(), event.toString());
-        penDraw(event);
-        invalidate();
+        switch (mCurrentFunChoice) {
+            case DRAW:
+                penDraw(event);
+                invalidate();
+                break;
+            case MOVE_AND_SCALE:
+                if (mMapView == null) {
+                    break;
+                }
+                mMapView.onTouchEvent(event);
+        }
         return true;
     }
 
 
     @Override
     protected void onDraw(Canvas canvas) {
+        if (mCurrentFunChoice != FuntionKind.DRAW) {
+            return;
+        }
         canvas.drawBitmap(mCanvasBitmap, 0, 0, null);
 
     //测试方法位图的绘制效果：
@@ -213,4 +262,5 @@ public class DrawView extends View {
             touchEventStringBuffer = new StringBuffer();
         }
     }
+
 }
