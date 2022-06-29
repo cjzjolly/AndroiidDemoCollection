@@ -68,8 +68,8 @@ public class MapView extends View {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 RectF unitRange = new RectF(0, 0, unitWidth, unitHeight);
                 unitRange.offset(xPos * unitWidth, yPos * unitHeight);
-                MapUnit mapUnit = new MapUnit(unitRange, MAX_SCALE);
-                mapUnit.setTag(new int[]{xPos, yPos});
+                MapUnit mapUnit = new MapUnit(new int[]{xPos, yPos}, unitRange, MAX_SCALE);
+//                mapUnit.setTag(new int[]{xPos, yPos});
                 mapUnitMatrix[xPos][yPos] = mapUnit;
             }
         }
@@ -273,7 +273,7 @@ public class MapView extends View {
 
     /**todo 把当前的绘制内容分割并叠加到瓦片中去**/
     public void drawBmp(Bitmap contentBmp) {
-        for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
+        for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit mapUnit = mapUnitMatrix[xPos][yPos];
                 if (mapUnit == null) {
@@ -282,5 +282,6 @@ public class MapView extends View {
                 mapUnit.drawBmp(contentBmp);
             }
         }
+        invalidate();
     }
 }

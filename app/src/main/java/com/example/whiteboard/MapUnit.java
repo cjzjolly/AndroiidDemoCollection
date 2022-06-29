@@ -25,7 +25,7 @@ public class MapUnit {
     private int mUnitXY[] = new int[2];
     private float mScale = 1f;
 
-    public MapUnit(RectF range, float maxScale) {
+    public MapUnit(int tag[], RectF range, float maxScale) {
         mMapRange = new RectF(range);
         Random random = new Random();
         mPaint = new Paint();
@@ -33,9 +33,8 @@ public class MapUnit {
         mPaint.setColor((0xFF000000 | (random.nextInt(255) & 0xFF) << 16 | (random.nextInt(255) & 0xFF) << 8 | (random.nextInt(255) & 0xFF)));
         mPaint.setStyle(Paint.Style.FILL);
         this.mMaxScale = maxScale;
+        setTag(tag);
         //todo 创建载体位图，以后从外存中读写，暂时先用内存里面建立的作为测试:
-        this.mTileBitmap = Bitmap.createBitmap((int) (mMapRange.width() * mMaxScale), (int) (mMapRange.height() * mMaxScale), Bitmap.Config.ARGB_8888);
-
 
 
 //        Canvas canvas = new Canvas(mTileBitmap);
@@ -113,6 +112,10 @@ public class MapUnit {
     public void setTag(int unitXY[]) {
         mUnitXY[0] = unitXY[0];
         mUnitXY[1] = unitXY[1];
+        mTileBitmap = MapImageManager.getTileImage(unitXY, mMaxScale);
+//        if (mTileBitmap == null) {
+//            mTileBitmap = Bitmap.createBitmap((int) (mMapRange.width() * mMaxScale), (int) (mMapRange.height() * mMaxScale), Bitmap.Config.ARGB_8888);
+//        }
     }
 
     public int[] getTag() {
@@ -124,23 +127,20 @@ public class MapUnit {
     }
 
     protected void onDraw(Canvas canvas) {
-        if (null == mMapRange) {
+        if (null == mMapRange || null == mTileBitmap) {
             return;
         }
         Log.i("onDraw", hashCode() + "");
         //绘制随机色背景
 //        canvas.drawRect(mMapRange, mPaint);
-
-
+        //绘制内容中应放到瓦片的部分
         canvas.drawBitmap(mTileBitmap, new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight()),
                 mMapRange, null);
-
-
-
+        //测试代码:
         Paint paintPen = new Paint();
         paintPen.setStrokeWidth(8f);
         paintPen.setStyle(Paint.Style.FILL);
-        paintPen.setColor(Color.BLACK);
+        paintPen.setColor(Color.RED);
         paintPen.setTextSize(20f);
         paintPen.setAntiAlias(true);
         //绘制自己是第几列第几行的单元
@@ -150,14 +150,16 @@ public class MapUnit {
         }
     }
 
+    /**把白板的内容绘制到瓦片中**/
     public void drawBmp(Bitmap contentBmp) {
-        if (null == mTileBitmap) {
-            return;
+        if (mTileBitmap == null) {
+            mTileBitmap = Bitmap.createBitmap((int) (mMapRange.width() * mMaxScale), (int) (mMapRange.height() * mMaxScale), Bitmap.Config.ARGB_8888);
         }
         Canvas canvas = new Canvas(mTileBitmap);
         Rect rectSrc = new Rect((int) (mMapRange.left * mMaxScale), (int) (mMapRange.top * mMaxScale),
                 (int) (mMapRange.right * mMaxScale), (int) (mMapRange.bottom * mMaxScale));
         Rect rectDst = new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight());
         canvas.drawBitmap(contentBmp, rectSrc, rectDst, null);
+        MapImageManager.saveTileImage(getTag(), mTileBitmap, mMaxScale);
     }
 }
