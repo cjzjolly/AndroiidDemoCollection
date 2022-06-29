@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**图块管理系统**/
 public class MapImageManager {
-    /**todo 暂时用map代替外存**/
+    /**todo 暂时用map模拟外存**/
     private static Map<Integer, Map<Integer, Bitmap>> mBmpMap = new HashMap<>();
 
 

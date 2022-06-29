@@ -19,6 +19,7 @@ import java.util.Random;
 
 public class MapUnit {
     private Bitmap mTileBitmap;
+    private Bitmap mFastCacheBmp;
     private float mMaxScale = 1f;
     private Paint mPaint;
     private RectF mMapRange;
@@ -60,6 +61,9 @@ public class MapUnit {
         matrix.setScale(scale, scale);
         matrix.mapRect(mMapRange);
         mScale *= scale;
+        //缩放率变化了，销毁预览提速缩略图
+        clearFastCacheBmp();
+
     }
 
     public float getScale() {
@@ -108,6 +112,14 @@ public class MapUnit {
         return mMapRange.height();
     }
 
+    /**todo 绘制的时候根据缩放率做一些小图提升绘制效率，缩放/更换标记的时候销毁，绘制的时候创建一次**/
+    private void clearFastCacheBmp() {
+        if (mFastCacheBmp != null && !mFastCacheBmp.isRecycled()) {
+            mFastCacheBmp.recycle();
+            mFastCacheBmp = null;
+        }
+    }
+
 
     public void setTag(int unitXY[]) {
         mUnitXY[0] = unitXY[0];
@@ -116,6 +128,8 @@ public class MapUnit {
 //        if (mTileBitmap == null) {
 //            mTileBitmap = Bitmap.createBitmap((int) (mMapRange.width() * mMaxScale), (int) (mMapRange.height() * mMaxScale), Bitmap.Config.ARGB_8888);
 //        }
+        //标记变化了，销毁预览提速缩略图
+        clearFastCacheBmp();
     }
 
     public int[] getTag() {
@@ -133,9 +147,21 @@ public class MapUnit {
         Log.i("onDraw", hashCode() + "");
         //绘制随机色背景
 //        canvas.drawRect(mMapRange, mPaint);
+        //按照缩放率，减少要绘制的像素量
+        if (mFastCacheBmp == null && mTileBitmap != null) {
+            int w = (int) mMapRange.width();
+            int h = (int) mMapRange.height();
+            mFastCacheBmp = Bitmap.createScaledBitmap(mTileBitmap,  w + (w % 2 == 0 ? 0 : 1), h + (h % 2 == 0 ? 0 : 1), true);
+//            MapImageManager.saveTileImage(getTag(), mTileBitmap, mScale);
+        }
         //绘制内容中应放到瓦片的部分
-        canvas.drawBitmap(mTileBitmap, new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight()),
-                mMapRange, null);
+        if (mFastCacheBmp != null) {
+            canvas.drawBitmap(mFastCacheBmp, new Rect(0, 0, mFastCacheBmp.getWidth(), mFastCacheBmp.getHeight()),
+                    mMapRange, null);
+        } else {
+            canvas.drawBitmap(mTileBitmap, new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight()),
+                    mMapRange, null);
+        }
         //测试代码:
         Paint paintPen = new Paint();
         paintPen.setStrokeWidth(8f);
@@ -152,8 +178,10 @@ public class MapUnit {
 
     /**把白板的内容绘制到瓦片中**/
     public void drawBmp(Bitmap contentBmp) {
+        //没有图块载体，创建一个
         if (mTileBitmap == null) {
-            mTileBitmap = Bitmap.createBitmap((int) (mMapRange.width() * mMaxScale), (int) (mMapRange.height() * mMaxScale), Bitmap.Config.ARGB_8888);
+            mTileBitmap = Bitmap.createBitmap((int) (mMapRange.width() / mScale * mMaxScale),
+                    (int) (mMapRange.height() / mScale * mMaxScale), Bitmap.Config.ARGB_8888);
         }
         Canvas canvas = new Canvas(mTileBitmap);
         Rect rectSrc = new Rect((int) (mMapRange.left * mMaxScale), (int) (mMapRange.top * mMaxScale),
@@ -161,5 +189,6 @@ public class MapUnit {
         Rect rectDst = new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight());
         canvas.drawBitmap(contentBmp, rectSrc, rectDst, null);
         MapImageManager.saveTileImage(getTag(), mTileBitmap, mMaxScale);
+        clearFastCacheBmp();
     }
 }
