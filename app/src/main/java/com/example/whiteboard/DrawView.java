@@ -127,6 +127,11 @@ public class DrawView extends View {
         this.mMapView = mapView;
     }
 
+    /**设置绘制方式**/
+    public void setCurrentDrawKind(DrawKind mCurrentDrawKind) {
+        this.mCurrentDrawKind = mCurrentDrawKind;
+    }
+
 
     /**获取绘制笔**/
     private Paint makePaint() {

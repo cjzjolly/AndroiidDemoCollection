@@ -2,11 +2,14 @@ package com.example.whiteboard;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 
 import androidx.annotation.Nullable;
 
@@ -35,6 +38,25 @@ public class MainActivity extends Activity {
             }
         });
         linearLayout.addView(checkBox);
+        //绘制选择:
+        RadioGroup radioGroup = new RadioGroup(this);
+        RadioButton rbDrawModeNormal = new RadioButton(this);
+        rbDrawModeNormal.setText("正常");
+        RadioButton rbDrawModePen = new RadioButton(this);
+        rbDrawModePen.setText("笔锋");
+        radioGroup.addView(rbDrawModeNormal);
+        radioGroup.addView(rbDrawModePen);
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == rbDrawModeNormal.getId()) {
+                drawView.setCurrentDrawKind(DrawView.DrawKind.NORMAL);
+                return;
+            }
+            if (checkedId == rbDrawModePen.getId()) {
+                drawView.setCurrentDrawKind(DrawView.DrawKind.PEN);
+                return;
+            }
+        });
+        linearLayout.addView(radioGroup);
         FrameLayout frameLayout = new FrameLayout(this);
         frameLayout.addView(mapView);
         frameLayout.addView(drawView);
