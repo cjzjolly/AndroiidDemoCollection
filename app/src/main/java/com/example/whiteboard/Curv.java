@@ -18,7 +18,7 @@ import java.util.List;
  * Created by cjz on 2018/9/17.
  */
 
-public class Curv/* extends BaseShape*/ {
+public class Curv extends BaseCurv {
     public Paint paint;
     private List<PointF> touchPointList = new ArrayList<>();
     private List<Path> segPathList = new ArrayList<>(); //用于加速画布的一小段一小段的path
@@ -119,6 +119,7 @@ public class Curv/* extends BaseShape*/ {
      * @param y
      * @param action
      */
+    @Override
     public void draw(float x, float y, int action, Canvas canvas) {
         if(!isStart()) {
             setCurrentRaw(x, y, action);
@@ -182,29 +183,6 @@ public class Curv/* extends BaseShape*/ {
             canvas.drawPath(segPathList.get(segPathList.size() - 1), paint);
 
         }
-        //抬起时把画好的线段生成OpenGL线段
-//        if(action == MotionEvent.ACTION_UP) {
-//            //OpenGL此时DPI和Canvas不一样，要放大再对景区
-//            Path path = new Path();
-//            Matrix matrix = new Matrix();
-//            matrix.postScale(UITrees.openGLRenderer.scale / 2, UITrees.openGLRenderer.scale / 2, UITrees.panelView.scaleCenterPoint.x, UITrees.panelView.scaleCenterPoint.y);
-//            totalPath.transform(matrix, path);
-//
-//            PathMeasure pathMeasure = new PathMeasure();
-//            pathMeasure.setPath(path, false);
-//            float step = 10f / paint.getStrokeWidth() > 1 ? 10f / paint.getStrokeWidth() : 1; //粗线条的点密度设置大一些咯
-//
-//            float[] point = new float[2];
-//            for(float i = 0; i < pathMeasure.getLength(); i += step) {
-//                pathMeasure.getPosTan(i, point, null);
-//                //todo 缩放之后,Canvas再加Path的时候还是采用实际点，但OpenGL用了这个点就和Canvas的不对齐了，因为OpenGL缩放是把画布前后推，要做做换算，例如缩放小了，左上角的坐标是画布外的坐标
-//
-//                float realtiveX = point[0] / 1080 * 4f - UITrees.openGLRenderer.dx;  //4个象限
-//                float realtiveY = -point[1] / 1080 * 4f + UITrees.openGLRenderer.dy ;
-//
-//                glLine.drawLine(realtiveX, realtiveY);
-//            }
-//        }
         if(action == MotionEvent.ACTION_UP) {
             if(mTotalPath != null && paint != null){
                 PathMeasure pathMeasure = new PathMeasure(mTotalPath, false);

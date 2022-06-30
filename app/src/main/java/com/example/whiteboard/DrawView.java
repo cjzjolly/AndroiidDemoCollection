@@ -23,7 +23,7 @@ import java.util.Map;
  */
 
 public class DrawView extends View {
-    private Curv mCurrentCurv;
+    private BaseCurv mCurrentCurv;
 
     /**当前绘制画布**/
     private Canvas mCanvas;
@@ -55,7 +55,7 @@ public class DrawView extends View {
 
 
     /**当前正在绘制的线条组合**/
-    private Map<Integer, Curv> currentDrawingMap = new HashMap<>();
+    private Map<Integer, BaseCurv> currentDrawingMap = new HashMap<>();
 
     /**位图放大倍数**/
     private float mMaxScale = 1f;
@@ -69,8 +69,17 @@ public class DrawView extends View {
         MOVE_AND_SCALE
     }
 
+    /**绘制方式选择**/
+    public enum DrawKind {
+        NORMAL,
+        PEN
+    }
+
     /**当前选择的绘制模式**/
     private FuntionKind mCurrentFunChoice = FuntionKind.DRAW;
+
+    /**当前选择的画笔模式**/
+    private DrawKind mCurrentDrawKind = DrawKind.NORMAL;
 
     public DrawView(Context context) {
         super(context);
@@ -145,7 +154,16 @@ public class DrawView extends View {
                 int id = event.getPointerId(event.getActionIndex());
                 touchEventStringBuffer.append("MotionEvent.ACTION_DOWN, id:" + id + "\n");
                 Paint paint = makePaint();
-                mCurrentCurv = new Curv(paint);
+                //根据不同的书写类型选择不同的效果:
+                switch (mCurrentDrawKind) {
+                    default:
+                    case NORMAL:
+                        mCurrentCurv = new Curv(paint);
+                        break;
+                    case PEN:
+                        mCurrentCurv = new CurvPenMode(paint);
+                        break;
+                }
                 mCurrentCurv.draw(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()), event.getAction(), mCanvas);
                 currentDrawingMap.put(id, mCurrentCurv);
                 break;
@@ -154,7 +172,15 @@ public class DrawView extends View {
                 int id = event.getPointerId(event.getActionIndex());
                 touchEventStringBuffer.append("MotionEvent.ACTION_DOWN, id:" + id + "\n");
                 Paint paint = makePaint();
-                mCurrentCurv = new Curv(paint);
+                switch (mCurrentDrawKind) {
+                    default:
+                    case NORMAL:
+                        mCurrentCurv = new Curv(paint);
+                        break;
+                    case PEN:
+                        mCurrentCurv = new CurvPenMode(paint);
+                        break;
+                }
                 mCurrentCurv.draw(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()), event.getAction(), mCanvas);
                 currentDrawingMap.put(id, mCurrentCurv);
                 break;
@@ -163,7 +189,7 @@ public class DrawView extends View {
                 for (int i = 0; i < event.getPointerCount(); i++) {
                     int id = event.getPointerId(i);
                     touchEventStringBuffer.append("MotionEvent.ACTION_MOVE, id:" + id + "\n");
-                    Curv curv = (Curv) currentDrawingMap.get(id);
+                    BaseCurv curv = currentDrawingMap.get(id);
                     if (curv != null) {
                         curv.draw(event.getX(i), event.getY(i), event.getAction(), mCanvas);
                     }
@@ -173,22 +199,34 @@ public class DrawView extends View {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP: {
                 int id = event.getPointerId(event.getActionIndex());
-
-
-                Curv curv = (Curv) currentDrawingMap.get(id);
+                BaseCurv curv = currentDrawingMap.get(id);
                 if (curv != null) {
-                    Path path = curv.getTotalPath();
-                    Paint paint = curv.paint;
-                    if (path != null && paint != null) {
-                        mCanvasScale.save();
-                        mCanvasScale.scale(mMaxScale, mMaxScale);
-                        mCanvasScale.drawPath(path, curv.paint);
-                        mCanvasScale.restore();
+                    //针对普通方式的画笔写到瓦片的方法
+                    switch (mCurrentDrawKind) {
+                        default:
+                        case NORMAL:
+                            if (curv instanceof Curv) {
+                                Path path = ((Curv) curv).getTotalPath();
+                                Paint paint = ((Curv) curv).paint;
+                                if (path != null && paint != null) {
+                                    mCanvasScale.save();
+                                    mCanvasScale.scale(mMaxScale, mMaxScale);
+                                    mCanvasScale.drawPath(path, ((Curv) curv).paint);
+                                    mCanvasScale.restore();
+                                }
+                            }
+                            break;
+                        case PEN:
+                            if (curv instanceof CurvPenMode) {
+                                mCanvasScale.save();
+                                mCanvasScale.scale(mMaxScale, mMaxScale);
+                                ((CurvPenMode) curv).drawToTileCanvas(mCanvasScale);
+                                mCanvasScale.restore();
+                            }
+                            break;
                     }
                 }
-
-
-
+                //清理用过的笔画对象
                 currentDrawingMap.remove(id);
                 break;
             }
