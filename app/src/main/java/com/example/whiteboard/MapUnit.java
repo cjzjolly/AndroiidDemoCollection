@@ -152,7 +152,12 @@ public class MapUnit {
             int w = (int) mMapRange.width();
             int h = (int) mMapRange.height();
             //使用2的倍数提升缩略图质量
-            mFastCacheBmp = Bitmap.createScaledBitmap(mTileBitmap,  w + (w % 2 == 0 ? 0 : 1), h + (h % 2 == 0 ? 0 : 1), true);
+//            mFastCacheBmp = Bitmap.createScaledBitmap(mTileBitmap,  w + (w % 2 == 0 ? 0 : 1), h + (h % 2 == 0 ? 0 : 1), true);
+            //这样处理速度快一些
+            mFastCacheBmp = Bitmap.createBitmap(w + (w % 2 == 0 ? 0 : 1), h + (h % 2 == 0 ? 0 : 1), Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(mFastCacheBmp);
+            c.drawBitmap(mTileBitmap, new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight()),
+                    new Rect(0, 0, mFastCacheBmp.getWidth(), mFastCacheBmp.getHeight()), null);
         }
         //绘制内容中应放到瓦片的部分
         if (mFastCacheBmp != null && mScale < 2f) {
