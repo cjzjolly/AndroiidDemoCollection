@@ -44,8 +44,11 @@ public class MainActivity extends Activity {
         rbDrawModeNormal.setText("正常");
         RadioButton rbDrawModePen = new RadioButton(this);
         rbDrawModePen.setText("笔锋");
+        RadioButton rbDrawModeEraser = new RadioButton(this);
+        rbDrawModeEraser.setText("橡皮擦");
         radioGroup.addView(rbDrawModeNormal);
         radioGroup.addView(rbDrawModePen);
+        radioGroup.addView(rbDrawModeEraser);
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == rbDrawModeNormal.getId()) {
                 drawView.setCurrentDrawKind(DrawView.DrawKind.NORMAL);
@@ -53,6 +56,10 @@ public class MainActivity extends Activity {
             }
             if (checkedId == rbDrawModePen.getId()) {
                 drawView.setCurrentDrawKind(DrawView.DrawKind.PEN);
+                return;
+            }
+            if (checkedId == rbDrawModeEraser.getId()) {
+                drawView.setCurrentDrawKind(DrawView.DrawKind.ERASER);
                 return;
             }
         });

@@ -71,8 +71,9 @@ public class DrawView extends View {
 
     /**绘制方式选择**/
     public enum DrawKind {
-        NORMAL,
-        PEN
+        NORMAL, //最普通
+        PEN,  //笔锋
+        ERASER //橡皮擦
     }
 
     /**当前选择的绘制模式**/
@@ -168,6 +169,9 @@ public class DrawView extends View {
                     case PEN:
                         mCurrentCurv = new CurvPenMode(paint);
                         break;
+                    case ERASER:
+                        mCurrentCurv = new CurvEraser(paint);
+                        break;
                 }
                 mCurrentCurv.draw(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()), event.getAction(), mCanvas);
                 currentDrawingMap.put(id, mCurrentCurv);
@@ -184,6 +188,9 @@ public class DrawView extends View {
                         break;
                     case PEN:
                         mCurrentCurv = new CurvPenMode(paint);
+                        break;
+                    case ERASER:
+                        mCurrentCurv = new CurvEraser(paint);
                         break;
                 }
                 mCurrentCurv.draw(event.getX(event.getActionIndex()), event.getY(event.getActionIndex()), event.getAction(), mCanvas);
@@ -227,6 +234,18 @@ public class DrawView extends View {
                                 mCanvasScale.scale(mMaxScale, mMaxScale);
                                 ((CurvPenMode) curv).drawToTileCanvas(mCanvasScale);
                                 mCanvasScale.restore();
+                            }
+                            break;
+                        case ERASER:
+                            if (curv instanceof CurvEraser) {
+                                Path path = ((CurvEraser) curv).getTotalPath();
+                                Paint paint = ((CurvEraser) curv).mPaint;
+                                if (path != null && paint != null) {
+                                    mCanvasScale.save();
+                                    mCanvasScale.scale(mMaxScale, mMaxScale);
+                                    mCanvasScale.drawPath(path, paint);
+                                    mCanvasScale.restore();
+                                }
                             }
                             break;
                     }
