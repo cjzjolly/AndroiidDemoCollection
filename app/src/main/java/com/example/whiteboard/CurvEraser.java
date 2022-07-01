@@ -68,7 +68,7 @@ public class CurvEraser extends BaseCurv {
 
     public CurvEraser(Paint paint) {
         this.mPaint = new Paint(paint);
-        this.mPaint.setColor(Color.RED);
+        this.mPaint.setColor(0x00ABCDEF);
         this.mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));  //擦除模式
         init();
     }
@@ -133,6 +133,9 @@ public class CurvEraser extends BaseCurv {
 //            if(!isBuildPathAllDoing)
             touchPointList.add(new PointF(x, y));
             segPathList.add(new Path());
+            this.mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));  //擦除模式
+            canvas.drawPath(segPathList.get(segPathList.size() - 1), mPaint);
+            this.mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));  //绘图
             canvas.drawPath(segPathList.get(segPathList.size() - 1), mPaint);
 
         } else {
@@ -185,7 +188,11 @@ public class CurvEraser extends BaseCurv {
                     mTotalPath.quadTo(cx, cy, midX, midY);
                 }
             }
+            this.mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));  //擦除模式
             canvas.drawPath(segPathList.get(segPathList.size() - 1), mPaint);
+            this.mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));  //绘图
+            canvas.drawPath(segPathList.get(segPathList.size() - 1), mPaint);
+
 
         }
         if(action == MotionEvent.ACTION_UP) {
@@ -195,6 +202,9 @@ public class CurvEraser extends BaseCurv {
                     mPaint.setStyle(Paint.Style.FILL);
                     mTotalPath = new Path();
                     mTotalPath.addCircle(x + mPaint.getStrokeWidth() / 2f, y + mPaint.getStrokeWidth() / 2f, mPaint.getStrokeWidth() / 2f, Path.Direction.CCW);
+                    this.mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));  //擦除模式
+                    canvas.drawPath(mTotalPath, mPaint);
+                    this.mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));  //绘图
                     canvas.drawPath(mTotalPath, mPaint);
                 }
             }

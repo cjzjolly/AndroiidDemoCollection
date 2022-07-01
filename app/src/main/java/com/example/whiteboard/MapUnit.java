@@ -145,7 +145,7 @@ public class MapUnit {
             return;
         }
         Log.i("onDraw", hashCode() + "");
-        //绘制随机色背景
+        //绘制边界框
         canvas.drawRect(mMapRange, mPaint);
         //按照缩放率，减少要绘制的像素量
         if (mFastCacheBmp == null && mTileBitmap != null && mScale < 2f) { //缩放率足够大的时候，显示瓦片数很少，没必要做缩略图了

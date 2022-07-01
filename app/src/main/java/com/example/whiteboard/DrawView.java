@@ -262,12 +262,14 @@ public class DrawView extends View {
         mCurrentFunChoice = funtionKind;
         switch (funtionKind) {
             case DRAW:
+                //cjzmark todo 先把之前绘制好的内容还原到前景
                 invalidate();
                 break;
             case MOVE_AND_SCALE:
                 if (mMapView == null || mCanvasScaleBitmap == null) {
                     return;
                 }
+                //移动缩放前，把绘制的内容写到瓦片上
                 mMapView.drawBmp(mCanvasScaleBitmap);
                 mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                 mCanvasScale.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);

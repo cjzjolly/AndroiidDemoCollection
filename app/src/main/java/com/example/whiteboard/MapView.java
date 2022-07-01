@@ -279,10 +279,16 @@ public class MapView extends View {
 
     /**todo 把当前的绘制内容分割并叠加到瓦片中去**/
     public void drawBmp(Bitmap contentBmp) {
+        RectF mapViewRange = new RectF(0, 0, mWidth, mHeight);
         for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit mapUnit = mapUnitMatrix[xPos][yPos];
                 if (mapUnit == null) {
+                    continue;
+                }
+                //如果和可见区域不相交，就不保存了
+                if (null == mapUnit.getRange() ||
+                        !mapViewRange.intersects(mapUnit.getRange().left, mapUnit.getRange().top, mapUnit.getRange().right, mapUnit.getRange().bottom)) {
                     continue;
                 }
                 mapUnit.drawBmp(contentBmp);

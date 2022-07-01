@@ -1,7 +1,9 @@
 package com.example.whiteboard;
 
+import android.Manifest;
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -13,10 +15,15 @@ import android.widget.RadioGroup;
 
 import androidx.annotation.Nullable;
 
+import java.io.File;
+
 public class MainActivity extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    private void init() {
         MapView mapView = new MapView(this);
         DrawView drawView = new DrawView(this);
         drawView.setMapView(mapView);
@@ -70,5 +77,28 @@ public class MainActivity extends Activity {
         frameLayout.addView(linearLayout);
 
         setContentView(frameLayout);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //增加权限申请代码
+        if (PermissionChecker
+                .checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) &&
+                PermissionChecker.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            File rootDir = new File(String.format("%s/cache", getExternalCacheDir().getAbsolutePath()));
+            if (!rootDir.exists()) {
+                rootDir.mkdir();
+            } else if(!rootDir.isDirectory()) {
+                rootDir.delete();
+                rootDir.mkdir();
+            }
+            MapImageManager.setRootPath(rootDir);
+            init();
+        } else {
+            PermissionChecker.requestPermissions(this, new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, PictureConfig.APPLY_STORAGE_PERMISSIONS_CODE);
+        }
     }
 }
