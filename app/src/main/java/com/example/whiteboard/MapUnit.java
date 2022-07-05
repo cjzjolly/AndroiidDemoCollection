@@ -23,7 +23,7 @@ public class MapUnit {
     private float mMaxScale = 1f;
     private Paint mPaint;
     private RectF mMapRange;
-    private int mUnitXY[] = new int[2];
+    private int mUnitXY[] = new int[] {Integer.MIN_VALUE, Integer.MIN_VALUE};
     private float mScale = 1f;
 
     public MapUnit(int tag[], RectF range, float maxScale) {
@@ -35,7 +35,6 @@ public class MapUnit {
         mPaint.setStyle(Paint.Style.STROKE);
         this.mMaxScale = maxScale;
         setTag(tag);
-        //todo 创建载体位图，以后从外存中读写，暂时先用内存里面建立的作为测试:
 
 
 //        Canvas canvas = new Canvas(mTileBitmap);

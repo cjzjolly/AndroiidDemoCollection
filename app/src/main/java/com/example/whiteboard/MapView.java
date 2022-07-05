@@ -263,18 +263,6 @@ public class MapView extends View {
                 }
             }
         }
-
-//        for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
-//            for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
-//                MapUnit view = mapUnitMatrix[xPos][yPos];
-//                //移除去的部分添加到未显示的部分的末尾
-//                if (view.getRange().right < mWidth && xPos == MATRIX_LENGTH - 1) {
-//
-//                } else if (view.getRange().left < 0) {
-//
-//                }
-//            }
-//        }
         Log.i("移动", String.format("x位移：%f， y位移：%f", distanceX, distanceY));
         invalidate();
     }
@@ -302,7 +290,7 @@ public class MapView extends View {
         }
     }
 
-    /**todo 把当前的绘制内容分割并叠加到瓦片中去**/
+    /**把当前的绘制内容分割并叠加到瓦片中去**/
     public void drawBmp(Bitmap contentBmp) {
         RectF mapViewRange = new RectF(0, 0, mWidth, mHeight);
         for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
