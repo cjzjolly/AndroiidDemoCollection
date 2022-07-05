@@ -9,6 +9,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**图块管理系统**/
 public class MapImageManager {
@@ -48,20 +51,26 @@ public class MapImageManager {
         }
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(tileFile);
+            ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
+            zipOutputStream.putNextEntry(new ZipEntry("content"));
             int w = tileBmp.getWidth();
             int h = tileBmp.getHeight();
-            fileOutputStream.write((byte) ((w >> 24) & 0xFF)); //写入图块w
-            fileOutputStream.write((byte) ((w >> 16) & 0xFF)); //写入图块w
-            fileOutputStream.write((byte) ((w >> 8) & 0xFF)); //写入图块w
-            fileOutputStream.write((byte) (w & 0xFF)); //写入图块w
-            fileOutputStream.write((byte) ((h >> 24) & 0xFF)); //写入图块h
-            fileOutputStream.write((byte) ((h >> 16) & 0xFF)); //写入图块h
-            fileOutputStream.write((byte) ((h >> 8) & 0xFF)); //写入图块h
-            fileOutputStream.write((byte) (h & 0xFF)); //写入图块h
+            zipOutputStream.write((byte) ((w >> 24) & 0xFF)); //写入图块w
+            zipOutputStream.write((byte) ((w >> 16) & 0xFF)); //写入图块w
+            zipOutputStream.write((byte) ((w >> 8) & 0xFF)); //写入图块w
+            zipOutputStream.write((byte) (w & 0xFF)); //写入图块w
+            zipOutputStream.write((byte) ((h >> 24) & 0xFF)); //写入图块h
+            zipOutputStream.write((byte) ((h >> 16) & 0xFF)); //写入图块h
+            zipOutputStream.write((byte) ((h >> 8) & 0xFF)); //写入图块h
+            zipOutputStream.write((byte) (h & 0xFF)); //写入图块h
             byte pixels[] = new byte[tileBmp.getWidth() * tileBmp.getHeight() * 4];
             tileBmp.copyPixelsToBuffer(ByteBuffer.wrap(pixels));
-            fileOutputStream.write(pixels);
-            fileOutputStream.close();
+            zipOutputStream.write(pixels);
+            zipOutputStream.setComment(tileFile.getName());
+
+
+//            fileOutputStream.close();
+            zipOutputStream.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -87,10 +96,15 @@ public class MapImageManager {
         }
         try {
             FileInputStream fileInputStream = new FileInputStream(tileFile);
+            ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
+            ZipEntry zipEntry = zipInputStream.getNextEntry();
+            if (zipEntry == null) {
+                return null;
+            }
             byte wByteArray[] = new byte[4];
             byte hByteArray[] = new byte[4];
-            fileInputStream.read(wByteArray);
-            fileInputStream.read(hByteArray);
+            zipInputStream.read(wByteArray);
+            zipInputStream.read(hByteArray);
             int width = 0;
             int height = 0;
             width |= ((wByteArray[0] & 0xFF) << 24);
@@ -101,12 +115,16 @@ public class MapImageManager {
             height |= ((hByteArray[1] & 0xFF) << 16);
             height |= ((hByteArray[2] & 0xFF) << 8);
             height |= (hByteArray[3] & 0xFF);
+            Log.i("cjztest", String.format("wh:[%d, %d]", width, height));
+
             Bitmap unitPixelBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             mReadPixelsBuf = new byte[width * height * 4];
-            fileInputStream.read(mReadPixelsBuf);
+            zipInputStream.read(mReadPixelsBuf);
             unitPixelBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(mReadPixelsBuf));
-            fileInputStream.close();
             Log.i("cjztest", String.format("read:[%d, %d]", tag[0], tag[1]));
+            zipInputStream.closeEntry();
+            zipInputStream.close();
+//            fileInputStream.close();
             return unitPixelBitmap;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
