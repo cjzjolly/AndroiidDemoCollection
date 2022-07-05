@@ -185,14 +185,14 @@ public class MapView extends View {
     private void translate(float distanceX, float distanceY) {
         dx += distanceX;
         dy += distanceY;
-        for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
+        for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit view = mapUnitMatrix[xPos][yPos];
                 view.offset((int) distanceX, (int) distanceY);
             }
         }
         //x轴,y轴要分开两个循环处理，否则会引发混乱
-        for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
+        for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit view = mapUnitMatrix[xPos][yPos];
                 //移除去的部分添加到未显示的部分的末尾
@@ -221,7 +221,7 @@ public class MapView extends View {
                 }
             }
         }
-        for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
+        for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit view = mapUnitMatrix[xPos][yPos];
                 if (view.getXY().y + view.getHeight() < 0 && mHeight > 0) {

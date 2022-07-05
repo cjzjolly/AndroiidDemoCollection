@@ -14,22 +14,10 @@ import java.util.Map;
 
 /**图块管理系统**/
 public class MapImageManager {
-    /**todo 暂时用map模拟外存**/
-    private static Map<Integer, Map<Integer, Bitmap>> mBmpMap = new HashMap<>();
     private static File mRootDir = null;
 
 
     public static void saveTileImage(int tag[], Bitmap tileBmp, float currentScale) {
-//        if (null == mBmpMap.get(tag[0])) {
-//            mBmpMap.put(tag[0], new HashMap<>());
-//        }
-//        if (null == mBmpMap.get(tag[0]).get(tag[1])) {
-//            mBmpMap.get(tag[0]).put(tag[1], tileBmp);
-//        }
-
-
-
-
         if (null == mRootDir) {
             return;
         }
@@ -42,6 +30,7 @@ public class MapImageManager {
             levelSec.mkdir();
         }
         File tileFile = new File(levelSec, "tile.raw");
+        Log.i("cjztest", "tileFile:" + tileFile.getAbsolutePath());
         if (!tileFile.exists()) {
             try {
                 tileFile.createNewFile();
@@ -60,7 +49,16 @@ public class MapImageManager {
         }
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(tileFile);
-            fileOutputStream.write((byte) (tileBmp.getWidth() & 0xFF)); //写入图块边长
+            int w = tileBmp.getWidth();
+            int h = tileBmp.getHeight();
+            fileOutputStream.write((byte) ((w >> 24) & 0xFF)); //写入图块w
+            fileOutputStream.write((byte) ((w >> 16) & 0xFF)); //写入图块w
+            fileOutputStream.write((byte) ((w >> 8) & 0xFF)); //写入图块w
+            fileOutputStream.write((byte) (w & 0xFF)); //写入图块w
+            fileOutputStream.write((byte) ((h >> 24) & 0xFF)); //写入图块h
+            fileOutputStream.write((byte) ((h >> 16) & 0xFF)); //写入图块h
+            fileOutputStream.write((byte) ((h >> 8) & 0xFF)); //写入图块h
+            fileOutputStream.write((byte) (h & 0xFF)); //写入图块h
             byte pixels[] = new byte[tileBmp.getWidth() * tileBmp.getHeight() * 4];
             tileBmp.copyPixelsToBuffer(ByteBuffer.wrap(pixels));
             fileOutputStream.write(pixels);
@@ -74,15 +72,6 @@ public class MapImageManager {
 
     private static byte readPixels[] = null;
     public static Bitmap getTileImage(int tag[], float currentScale) {
-//        if (null == mBmpMap.get(tag[0])) {
-//            return null;
-//        }
-//        if (null == mBmpMap.get(tag[0]).get(tag[1])) {
-//            return null;
-//        }
-//        return mBmpMap.get(tag[0]).get(tag[1]);
-
-
         if (null == mRootDir) {
             return null;
         }
@@ -100,10 +89,22 @@ public class MapImageManager {
         }
         try {
             FileInputStream fileInputStream = new FileInputStream(tileFile);
-            int width = fileInputStream.read() & 0xFF;
-            Log.e("cjztest", "边张:" + width);
-            Bitmap unitPixelBitmap = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888);
-            readPixels = new byte[width * width * 4];
+            byte wByteArray[] = new byte[4];
+            byte hByteArray[] = new byte[4];
+            fileInputStream.read(wByteArray);
+            fileInputStream.read(hByteArray);
+            int width = 0;
+            int height = 0;
+            width |= ((wByteArray[0] & 0xFF) << 24);
+            width |= ((wByteArray[1] & 0xFF) << 16);
+            width |= ((wByteArray[2] & 0xFF) << 8);
+            width |= (wByteArray[3] & 0xFF);
+            height |= ((hByteArray[0] & 0xFF) << 24);
+            height |= ((hByteArray[1] & 0xFF) << 16);
+            height |= ((hByteArray[2] & 0xFF) << 8);
+            height |= (hByteArray[3] & 0xFF);
+            Bitmap unitPixelBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            readPixels = new byte[width * height * 4];
             fileInputStream.read(readPixels);
             unitPixelBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(readPixels));
             fileInputStream.close();
