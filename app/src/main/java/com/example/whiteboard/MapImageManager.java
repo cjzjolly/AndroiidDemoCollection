@@ -9,12 +9,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
 
 /**图块管理系统**/
 public class MapImageManager {
     private static File mRootDir = null;
+    private static byte mReadPixelsBuf[] = null;
 
 
     public static void saveTileImage(int tag[], Bitmap tileBmp, float currentScale) {
@@ -70,7 +69,6 @@ public class MapImageManager {
         }
     }
 
-    private static byte readPixels[] = null;
     public static Bitmap getTileImage(int tag[], float currentScale) {
         if (null == mRootDir) {
             return null;
@@ -104,10 +102,11 @@ public class MapImageManager {
             height |= ((hByteArray[2] & 0xFF) << 8);
             height |= (hByteArray[3] & 0xFF);
             Bitmap unitPixelBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            readPixels = new byte[width * height * 4];
-            fileInputStream.read(readPixels);
-            unitPixelBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(readPixels));
+            mReadPixelsBuf = new byte[width * height * 4];
+            fileInputStream.read(mReadPixelsBuf);
+            unitPixelBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(mReadPixelsBuf));
             fileInputStream.close();
+            Log.i("cjztest", String.format("read:[%d, %d]", tag[0], tag[1]));
             return unitPixelBitmap;
         } catch (FileNotFoundException e) {
             e.printStackTrace();

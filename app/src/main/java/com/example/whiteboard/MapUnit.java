@@ -122,6 +122,12 @@ public class MapUnit {
 
 
     public void setTag(int unitXY[]) {
+        if (unitXY == null) { //同样标号的图块就不重复从外存读图与更新了
+            return;
+        }
+        if (unitXY[0] == mUnitXY[0] && unitXY[1] == mUnitXY[1]) {
+            return;
+        }
         mUnitXY[0] = unitXY[0];
         mUnitXY[1] = unitXY[1];
         mTileBitmap = MapImageManager.getTileImage(unitXY, mMaxScale);

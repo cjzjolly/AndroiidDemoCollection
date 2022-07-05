@@ -147,7 +147,15 @@ public class MapView extends View {
                 if(prevCurrentCenter == null) {
                     prevCurrentCenter = new PointF(avergeX, avergeY);
                 } else {
-                    translate(avergeX - prevCurrentCenter.x, avergeY - prevCurrentCenter.y);
+                    float dx = avergeX - prevCurrentCenter.x;
+                    float dy = avergeY - prevCurrentCenter.y;
+                    if (Math.abs(dx) < 1f) {
+                        dx = 0f;
+                    }
+                    if (Math.abs(dy) < 1f) {
+                        dy = 0f;
+                    }
+                    translate(dx, dy);
                     prevCurrentCenter.set(avergeX, avergeY);
                 }
                 break;
@@ -191,12 +199,17 @@ public class MapView extends View {
                 view.offset((int) distanceX, (int) distanceY);
             }
         }
+        //以单元格组成的总范围作为判断，这个范围要和视口对齐:
+        int leftSide = mWidth / 2 - (int) (mapUnitMatrix[0][0].getWidth() * MATRIX_LENGTH / 2);
+        int rightSide = mWidth / 2 + (int) (mapUnitMatrix[0][0].getWidth() * MATRIX_LENGTH / 2);
+        int topSide = mHeight / 2 - (int) (mapUnitMatrix[0][0].getHeight() * MATRIX_LENGTH / 2);
+        int bottomSide = mHeight / 2 + (int) (mapUnitMatrix[0][0].getHeight() * MATRIX_LENGTH / 2);
         //x轴,y轴要分开两个循环处理，否则会引发混乱
         for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit view = mapUnitMatrix[xPos][yPos];
                 //移除去的部分添加到未显示的部分的末尾
-                if (view.getXY().x + view.getWidth() < 0 && mWidth > 0) { //单元格溢出到了屏幕左边，移动到当前对应行最右边
+                if (view.getXY().x + view.getWidth() < leftSide && mWidth > 0) { //单元格溢出到了屏幕左边，移动到当前对应行最右边
                     if (xPos == 0) {
                         //重设位置
                         view.setX(mapUnitMatrix[MATRIX_LENGTH - 1][yPos].getXY().x + mapUnitMatrix[MATRIX_LENGTH - 1][yPos].getWidth());
@@ -207,7 +220,7 @@ public class MapView extends View {
                         mapUnitMatrix[MATRIX_LENGTH - 1][yPos] = (MapUnit) view;
                     }
                 }
-                else if (view.getXY().x > mWidth && mWidth > 0) {
+                else if (view.getXY().x > rightSide && mWidth > 0) {
                     if (xPos == MATRIX_LENGTH - 1) { //因为初始化时显示的Unit是最左上角的Unit，有可能导致非最后一列的内容被平移，这违反自动补充的逻辑，会出bug，所以要加判断
                         //重设位置(设置和最后一个的左上角坐标直接重合（setx用于设定左上角坐标），再减去控件宽度*缩放量使得目标控件右上角和最后一个控件左上角对齐)
                         view.setX(mapUnitMatrix[0][yPos].getXY().x - mapUnitMatrix[0][yPos].getWidth());
@@ -224,7 +237,7 @@ public class MapView extends View {
         for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit view = mapUnitMatrix[xPos][yPos];
-                if (view.getXY().y + view.getHeight() < 0 && mHeight > 0) {
+                if (view.getXY().y + view.getHeight() < topSide && mHeight > 0) {
                     if (yPos == 0) {
                         //重设位置
                         view.setY(mapUnitMatrix[xPos][MATRIX_LENGTH - 1].getXY().y + mapUnitMatrix[xPos][MATRIX_LENGTH - 1].getHeight());
@@ -235,7 +248,7 @@ public class MapView extends View {
                         mapUnitMatrix[xPos][MATRIX_LENGTH - 1] = (MapUnit) view;
                     }
                 }
-                else if (view.getXY().y > mHeight && mHeight > 0) {
+                else if (view.getXY().y > bottomSide && mHeight > 0) {
                     if (yPos == MATRIX_LENGTH - 1) {
                         //Log.i("越位", "到了屏幕下边界");
                         //重设位置(设置和最后一个的左上角坐标直接重合（setx用于设定左上角坐标），再减去控件宽度*缩放量使得目标控件右上角和最后一个控件左上角对齐)
@@ -250,6 +263,18 @@ public class MapView extends View {
                 }
             }
         }
+
+//        for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
+//            for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
+//                MapUnit view = mapUnitMatrix[xPos][yPos];
+//                //移除去的部分添加到未显示的部分的末尾
+//                if (view.getRange().right < mWidth && xPos == MATRIX_LENGTH - 1) {
+//
+//                } else if (view.getRange().left < 0) {
+//
+//                }
+//            }
+//        }
         Log.i("移动", String.format("x位移：%f， y位移：%f", distanceX, distanceY));
         invalidate();
     }
@@ -261,7 +286,7 @@ public class MapView extends View {
         }
         RectF mapViewRange = new RectF(0, 0, mWidth, mHeight);
         /**遍历所有瓦片并进行绘制**/
-        for(int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
+        for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit mapUnit = mapUnitMatrix[xPos][yPos];
                 if (mapUnit == null) {
