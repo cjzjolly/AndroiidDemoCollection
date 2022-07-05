@@ -9,9 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**图块管理系统**/
 public class MapImageManager {
@@ -51,26 +50,22 @@ public class MapImageManager {
         }
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(tileFile);
-            ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
-            zipOutputStream.putNextEntry(new ZipEntry("content"));
+            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(fileOutputStream);
             int w = tileBmp.getWidth();
             int h = tileBmp.getHeight();
-            zipOutputStream.write((byte) ((w >> 24) & 0xFF)); //写入图块w
-            zipOutputStream.write((byte) ((w >> 16) & 0xFF)); //写入图块w
-            zipOutputStream.write((byte) ((w >> 8) & 0xFF)); //写入图块w
-            zipOutputStream.write((byte) (w & 0xFF)); //写入图块w
-            zipOutputStream.write((byte) ((h >> 24) & 0xFF)); //写入图块h
-            zipOutputStream.write((byte) ((h >> 16) & 0xFF)); //写入图块h
-            zipOutputStream.write((byte) ((h >> 8) & 0xFF)); //写入图块h
-            zipOutputStream.write((byte) (h & 0xFF)); //写入图块h
+            gzipOutputStream.write((byte) ((w >> 24) & 0xFF)); //写入图块w
+            gzipOutputStream.write((byte) ((w >> 16) & 0xFF)); //写入图块w
+            gzipOutputStream.write((byte) ((w >> 8) & 0xFF)); //写入图块w
+            gzipOutputStream.write((byte) (w & 0xFF)); //写入图块w
+            gzipOutputStream.write((byte) ((h >> 24) & 0xFF)); //写入图块h
+            gzipOutputStream.write((byte) ((h >> 16) & 0xFF)); //写入图块h
+            gzipOutputStream.write((byte) ((h >> 8) & 0xFF)); //写入图块h
+            gzipOutputStream.write((byte) (h & 0xFF)); //写入图块h
             byte pixels[] = new byte[tileBmp.getWidth() * tileBmp.getHeight() * 4];
             tileBmp.copyPixelsToBuffer(ByteBuffer.wrap(pixels));
-            zipOutputStream.write(pixels);
-            zipOutputStream.setComment(tileFile.getName());
-
-
+            gzipOutputStream.write(pixels);
 //            fileOutputStream.close();
-            zipOutputStream.close();
+            gzipOutputStream.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -96,15 +91,11 @@ public class MapImageManager {
         }
         try {
             FileInputStream fileInputStream = new FileInputStream(tileFile);
-            ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
-            ZipEntry zipEntry = zipInputStream.getNextEntry();
-            if (zipEntry == null) {
-                return null;
-            }
+            GZIPInputStream gzipInputStream = new GZIPInputStream(fileInputStream);
             byte wByteArray[] = new byte[4];
             byte hByteArray[] = new byte[4];
-            zipInputStream.read(wByteArray);
-            zipInputStream.read(hByteArray);
+            gzipInputStream.read(wByteArray);
+            gzipInputStream.read(hByteArray);
             int width = 0;
             int height = 0;
             width |= ((wByteArray[0] & 0xFF) << 24);
@@ -115,16 +106,13 @@ public class MapImageManager {
             height |= ((hByteArray[1] & 0xFF) << 16);
             height |= ((hByteArray[2] & 0xFF) << 8);
             height |= (hByteArray[3] & 0xFF);
-            Log.i("cjztest", String.format("wh:[%d, %d]", width, height));
-
             Bitmap unitPixelBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             mReadPixelsBuf = new byte[width * height * 4];
-            zipInputStream.read(mReadPixelsBuf);
+            gzipInputStream.read(mReadPixelsBuf);  //todo 可能这个东西不能一口气读写太多数据
             unitPixelBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(mReadPixelsBuf));
+            fileInputStream.close();
+            gzipInputStream.close();
             Log.i("cjztest", String.format("read:[%d, %d]", tag[0], tag[1]));
-            zipInputStream.closeEntry();
-            zipInputStream.close();
-//            fileInputStream.close();
             return unitPixelBitmap;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
