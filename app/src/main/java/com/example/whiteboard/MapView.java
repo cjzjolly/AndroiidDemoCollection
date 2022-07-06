@@ -29,7 +29,7 @@ public class MapView extends View {
     public static final float MAX_SCALE = 4f;
     /**缩放比例下限**/
     private final float MIN_SCALE = 0.5f;
-    private final int MATRIX_LENGTH = 8;
+    private final int MATRIX_LENGTH = 8 * 4;
     /**单元格表**/
     private MapUnit mapUnitMatrix[][] = new MapUnit[MATRIX_LENGTH][MATRIX_LENGTH];
 

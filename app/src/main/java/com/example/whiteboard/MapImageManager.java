@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -64,6 +65,7 @@ public class MapImageManager {
             byte pixels[] = new byte[tileBmp.getWidth() * tileBmp.getHeight() * 4];
             tileBmp.copyPixelsToBuffer(ByteBuffer.wrap(pixels));
             gzipOutputStream.write(pixels);
+            gzipOutputStream.flush();
 //            fileOutputStream.close();
             gzipOutputStream.close();
         } catch (FileNotFoundException e) {
@@ -108,7 +110,23 @@ public class MapImageManager {
             height |= (hByteArray[3] & 0xFF);
             Bitmap unitPixelBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
             mReadPixelsBuf = new byte[width * height * 4];
-            gzipInputStream.read(mReadPixelsBuf);  //todo 可能这个东西不能一口气读写太多数据
+            int status = 0;
+            int pos = 0;
+            int lenStep = 4096;
+            while ((status = gzipInputStream.read(mReadPixelsBuf, pos, lenStep)) != -1) {
+                pos += status;
+                if (pos + lenStep > mReadPixelsBuf.length) {
+                    lenStep = mReadPixelsBuf.length - pos;
+                    if (lenStep <= 0) {
+                        break;
+                    }
+                }
+                //方法2 但这样数据不完整
+//                if (pos + 4096 >= mReadPixelsBuf.length) {
+//                    break;
+//                }
+            }
+//            gzipInputStream.read(mReadPixelsBuf);  // 这个东西不能一口气读写太多数据
             unitPixelBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(mReadPixelsBuf));
             fileInputStream.close();
             gzipInputStream.close();
