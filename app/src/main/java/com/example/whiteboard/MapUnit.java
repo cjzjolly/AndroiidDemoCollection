@@ -35,14 +35,6 @@ public class MapUnit {
         mPaint.setStyle(Paint.Style.STROKE);
         this.mMaxScale = maxScale;
         setTag(tag);
-
-
-//        Canvas canvas = new Canvas(mTileBitmap);
-//        Paint paint = new Paint();
-//        paint.setStrokeWidth(12f);
-//        paint.setColor(Color.BLACK);
-//        paint.setStyle(Paint.Style.STROKE);
-//        canvas.drawCircle(mTileBitmap.getWidth() / 2, mTileBitmap.getHeight() / 2, mTileBitmap.getHeight() / 3, paint);
     }
 
     public void offset(int dx, int dy) {
@@ -119,7 +111,7 @@ public class MapUnit {
         }
     }
 
-
+    /**设置标记并更新图块**/
     public void setTag(int unitXY[]) {
         if (unitXY == null) { //同样标号的图块就不重复从外存读图与更新了
             return;
@@ -129,7 +121,10 @@ public class MapUnit {
         }
         mUnitXY[0] = unitXY[0];
         mUnitXY[1] = unitXY[1];
-        mTileBitmap = MapImageManager.getTileImage(unitXY, mMaxScale);
+        if (mTileBitmap != null) {
+            mTileBitmap.recycle();
+        }
+        mTileBitmap = null;
 //        if (mTileBitmap == null) {
 //            mTileBitmap = Bitmap.createBitmap((int) (mMapRange.width() * mMaxScale), (int) (mMapRange.height() * mMaxScale), Bitmap.Config.ARGB_8888);
 //        }
@@ -146,6 +141,9 @@ public class MapUnit {
     }
 
     protected void onDraw(Canvas canvas) {
+        if (mTileBitmap == null) {
+            mTileBitmap = MapImageManager.getTileImage(getTag(), mMaxScale);
+        }
         if (null == mMapRange || null == mTileBitmap) {
             return;
         }

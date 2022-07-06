@@ -213,7 +213,7 @@ public class MapView extends View {
                     if (xPos == 0) {
                         //重设位置
                         view.setX(mapUnitMatrix[MATRIX_LENGTH - 1][yPos].getXY().x + mapUnitMatrix[MATRIX_LENGTH - 1][yPos].getWidth());
-                        view.setTag(new int[] {mapUnitMatrix[MATRIX_LENGTH - 1][yPos].getTag()[0] + 1, view.getTag()[1]});
+                        view.setTag(new int[] {mapUnitMatrix[MATRIX_LENGTH - 1][yPos].getTag()[0] + 1, view.getTag()[1]});  //todo 使用线程池执行该方法
                         for (int i = xPos; i < MATRIX_LENGTH - 1; i++) {
                             mapUnitMatrix[i][yPos] = mapUnitMatrix[i + 1][yPos];
                         }
