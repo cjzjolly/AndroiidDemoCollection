@@ -3,14 +3,21 @@ package com.example.whiteboard;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -32,6 +39,8 @@ public class MapView extends View {
     private final int MATRIX_LENGTH = 8 * 4;
     /**单元格表**/
     private MapUnit mapUnitMatrix[][] = new MapUnit[MATRIX_LENGTH][MATRIX_LENGTH];
+    private ExecutorService mFixedThreadPool = Executors.newFixedThreadPool(8); //使用了多线程速度优化也并不大
+    private Object mLock = new Object();
 
     /*** 触摸点点距队列**/
     private Queue<Float> touchDistanceQueue = new LinkedBlockingQueue<>();
@@ -267,13 +276,19 @@ public class MapView extends View {
         invalidate();
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
+    private void refreshCanvas(Canvas canvas) {
         if (null == mapUnitMatrix) {
             return;
         }
+        if (canvas == null) {
+            return;
+        }
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         RectF mapViewRange = new RectF(0, 0, mWidth, mHeight);
         /**遍历所有瓦片并进行绘制**/
+        int createThreadCount = 0;
+        List<MapUnit> needRefreshUnit = new LinkedList<>();
+        //确定需要渲染的图块
         for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
             for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
                 MapUnit mapUnit = mapUnitMatrix[xPos][yPos];
@@ -284,10 +299,34 @@ public class MapView extends View {
                 if (null == mapUnit.getRange() ||
                         !mapViewRange.intersects(mapUnit.getRange().left, mapUnit.getRange().top, mapUnit.getRange().right, mapUnit.getRange().bottom)) {
                     continue;
-				}
-                mapUnit.onDraw(canvas);
+                }
+                createThreadCount++;
+                needRefreshUnit.add(mapUnit);
             }
         }
+        //多线程从外存中读入图块
+        CountDownLatch countDownLatch = new CountDownLatch(createThreadCount);
+        for (MapUnit mapUnit : needRefreshUnit) {
+            mFixedThreadPool.execute(new Thread(() -> { //证明了可以在子线程中执行
+                mapUnit.loadTileBmp();
+                countDownLatch.countDown();
+            }));
+        }
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //图块绘制
+        for (MapUnit mapUnit : needRefreshUnit) {
+            mapUnit.onDraw(canvas); //canvas不能同时被两个unit使用
+        }
+    }
+
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        refreshCanvas(canvas);
     }
 
     /**把当前的绘制内容分割并叠加到瓦片中去**/

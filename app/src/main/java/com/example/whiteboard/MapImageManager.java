@@ -16,7 +16,7 @@ import java.util.zip.GZIPOutputStream;
 /**图块管理系统**/
 public class MapImageManager {
     private static File mRootDir = null;
-    private static byte mReadPixelsBuf[] = null;
+    /**todo 加一块限制容量的内存块，在容量允许的情况下，最近读写过的压缩文件数据可以放进来**/
 
 
     public static void saveTileImage(int tag[], Bitmap tileBmp, float currentScale) {
@@ -109,10 +109,10 @@ public class MapImageManager {
             height |= ((hByteArray[2] & 0xFF) << 8);
             height |= (hByteArray[3] & 0xFF);
             Bitmap unitPixelBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            mReadPixelsBuf = new byte[width * height * 4];
+            byte mReadPixelsBuf[] = new byte[width * height * 4];
             int status = 0;
             int pos = 0;
-            int lenStep = 4096;
+            int lenStep = 4096 * 8;
             while ((status = gzipInputStream.read(mReadPixelsBuf, pos, lenStep)) != -1) {
                 pos += status;
                 if (pos + lenStep > mReadPixelsBuf.length) {

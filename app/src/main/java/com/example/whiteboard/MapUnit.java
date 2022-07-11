@@ -140,10 +140,15 @@ public class MapUnit {
         return mMapRange;
     }
 
-    protected void onDraw(Canvas canvas) {
+
+    public void loadTileBmp() {
         if (mTileBitmap == null) {
             mTileBitmap = MapImageManager.getTileImage(getTag(), mMaxScale);
         }
+    }
+
+    /**使用前先触发一次loadTileBmp加载图块**/
+    protected void onDraw(Canvas canvas) {
         if (null == mMapRange || null == mTileBitmap) {
             return;
         }
