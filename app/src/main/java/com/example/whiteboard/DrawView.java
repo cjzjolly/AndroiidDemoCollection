@@ -262,7 +262,10 @@ public class DrawView extends View {
         mCurrentFunChoice = funtionKind;
         switch (funtionKind) {
             case DRAW:
-                //cjzmark todo 先把之前绘制好的内容还原到前景
+                //cjzmark todo 先把之前绘制好的内容还原到前景 方法有两种： 1、把笔迹数据记录，直接还原出来 2、通过图块合成大图再修改
+                mMapView.readBMP(mCanvasScaleBitmap);
+                mMapView.readBMP(mCanvasBitmap);
+                mMapView.setVisibility(View.INVISIBLE);
                 invalidate();
                 break;
             case MOVE_AND_SCALE:
@@ -273,6 +276,7 @@ public class DrawView extends View {
                 mMapView.drawBmp(mCanvasScaleBitmap);
                 mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                 mCanvasScale.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                mMapView.setVisibility(View.VISIBLE);
                 invalidate();
                 break;
         }
@@ -303,7 +307,7 @@ public class DrawView extends View {
         }
         canvas.drawBitmap(mCanvasBitmap, 0, 0, null);
 
-    //测试方法位图的绘制效果：
+    //测试放大位图的绘制效果：
 //        Matrix matrix = new Matrix();
 //        matrix.setScale(1f / mMaxScale, 1f / mMaxScale);
 //        canvas.drawBitmap(mCanvasScaleBitmap, matrix, null);

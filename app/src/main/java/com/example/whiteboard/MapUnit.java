@@ -6,6 +6,8 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
@@ -25,6 +27,7 @@ public class MapUnit {
     private RectF mMapRange;
     private int mUnitXY[] = new int[] {Integer.MIN_VALUE, Integer.MIN_VALUE};
     private float mScale = 1f;
+    private final boolean mIsDebug = true;
 
     public MapUnit(int tag[], RectF range, float maxScale) {
         mMapRange = new RectF(range);
@@ -154,7 +157,9 @@ public class MapUnit {
         }
         Log.i("onDraw", hashCode() + "");
         //绘制边界框
-        canvas.drawRect(mMapRange, mPaint);
+        if (mIsDebug) {
+            canvas.drawRect(mMapRange, mPaint);
+        }
         //按照缩放率，减少要绘制的像素量
         if (mFastCacheBmp == null && mTileBitmap != null && mScale < 2f) { //缩放率足够大的时候，显示瓦片数很少，没必要做缩略图了
             int w = (int) mMapRange.width();
@@ -176,17 +181,27 @@ public class MapUnit {
                     mMapRange, null);
         }
         //测试代码:
-        Paint paintPen = new Paint();
-        paintPen.setStrokeWidth(8f);
-        paintPen.setStyle(Paint.Style.FILL);
-        paintPen.setColor(Color.RED);
-        paintPen.setTextSize(20f);
-        paintPen.setAntiAlias(true);
-        //绘制自己是第几列第几行的单元
-        if (mUnitXY != null) {
-            int position[] = mUnitXY;
-            canvas.drawText(String.format("UnitX: %d, UnitY: %d", position[0], position[1]),  mMapRange.centerX() - 40, mMapRange.centerY(), paintPen);
+        if (mIsDebug) {
+            Paint paintPen = new Paint();
+            paintPen.setStrokeWidth(8f);
+            paintPen.setStyle(Paint.Style.FILL);
+            paintPen.setColor(Color.RED);
+            paintPen.setTextSize(20f);
+            paintPen.setAntiAlias(true);
+            //绘制自己是第几列第几行的单元
+            if (mUnitXY != null) {
+                int position[] = mUnitXY;
+                canvas.drawText(String.format("UnitX: %d, UnitY: %d", position[0], position[1]), mMapRange.centerX() - 40, mMapRange.centerY(), paintPen);
+            }
         }
+    }
+
+    public void drawTo(Canvas canvas) {
+        if (null == mMapRange || null == mTileBitmap) {
+            return;
+        }
+        canvas.drawBitmap(mTileBitmap, new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight()),
+                mMapRange, null);
     }
 
     /**把白板的内容绘制到瓦片中**/
@@ -196,11 +211,27 @@ public class MapUnit {
             mTileBitmap = Bitmap.createBitmap((int) (mMapRange.width() / mScale * mMaxScale),
                     (int) (mMapRange.height() / mScale * mMaxScale), Bitmap.Config.ARGB_8888);
         }
+        //已有的话就进行内容替换
         Canvas canvas = new Canvas(mTileBitmap);
         Rect rectSrc = new Rect((int) (mMapRange.left * mMaxScale), (int) (mMapRange.top * mMaxScale),
-                (int) (mMapRange.right * mMaxScale), (int) (mMapRange.bottom * mMaxScale));
-        Rect rectDst = new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight());
-        canvas.drawBitmap(contentBmp, rectSrc, rectDst, null);
+                (int) (mMapRange.right * mMaxScale), (int) (mMapRange.bottom * mMaxScale));  //大图取材的范围
+        Rect rectDst = new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight()); //小图覆盖的范围
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+//        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST));  //todo 和可视区域相交，但是有一部分不相交的，会导致不相交的部分被空像素覆盖，导致画面不连续
+        canvas.drawBitmap(contentBmp, rectSrc, rectDst, paint);
+
+//        //cjztest 有没有板擦像素标题的痕迹？ 没有
+//        for (int y = 0; y < mTileBitmap.getHeight(); y ++) {
+//            for (int x = 0; x < mTileBitmap.getWidth(); x ++) {
+//                int pixel = mTileBitmap.getPixel(x, y);
+//                if (pixel == 0x01ABCDEF) {
+//                    Log.i("cjztest", "有好东西");
+//                }
+//            }
+//        }
+
         MapImageManager.saveTileImage(getTag(), mTileBitmap, mMaxScale);
         clearFastCacheBmp();
     }

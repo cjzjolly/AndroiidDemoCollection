@@ -363,4 +363,25 @@ public class MapView extends View {
         }
         invalidate();
     }
+
+    /**图块合成大图**/
+    public void readBMP(Bitmap bmp) {
+        RectF mapViewRange = new RectF(0, 0, mWidth, mHeight);
+        Canvas canvas = new Canvas(bmp);
+        canvas.scale(canvas.getWidth() / (float) mWidth, canvas.getHeight() / (float) mHeight); //让任意放大倍数的载体图片都能正常绘制
+        for (int yPos = 0; yPos < MATRIX_LENGTH; yPos++) {
+            for (int xPos = 0; xPos < MATRIX_LENGTH; xPos++) {
+                MapUnit mapUnit = mapUnitMatrix[xPos][yPos];
+                if (mapUnit == null) {
+                    continue;
+                }
+                //如果和可见区域不相交，就不绘制了
+                if (null == mapUnit.getRange() ||
+                        !mapViewRange.intersects(mapUnit.getRange().left, mapUnit.getRange().top, mapUnit.getRange().right, mapUnit.getRange().bottom)) {
+                    continue;
+                }
+                mapUnit.drawTo(canvas);
+            }
+        }
+    }
 }
