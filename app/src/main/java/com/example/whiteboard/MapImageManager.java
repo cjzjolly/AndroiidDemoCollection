@@ -32,7 +32,7 @@ public class MapImageManager {
             levelSec.mkdir();
         }
         File tileFile = new File(levelSec, "tile.raw");
-        Log.i("cjztest", "tileFile:" + tileFile.getAbsolutePath());
+//        Log.i("cjztest", "tileFile:" + tileFile.getAbsolutePath());
         if (!tileFile.exists()) {
             try {
                 tileFile.createNewFile();
@@ -130,7 +130,7 @@ public class MapImageManager {
             unitPixelBitmap.copyPixelsFromBuffer(ByteBuffer.wrap(mReadPixelsBuf));
             fileInputStream.close();
             gzipInputStream.close();
-            Log.i("cjztest", String.format("read:[%d, %d]", tag[0], tag[1]));
+//            Log.i("cjztest", String.format("read:[%d, %d]", tag[0], tag[1]));
             return unitPixelBitmap;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
