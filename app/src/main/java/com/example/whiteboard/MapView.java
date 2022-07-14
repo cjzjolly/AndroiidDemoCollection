@@ -84,6 +84,7 @@ public class MapView extends View {
                 RectF unitRange = new RectF(0, 0, unitWidth, unitHeight);
                 unitRange.offset(xPos * unitWidth, yPos * unitHeight);
                 MapUnit mapUnit = new MapUnit(new int[]{xPos, yPos}, unitRange, MAX_SCALE);
+                mapUnit.setMapViewSize(mWidth, mHeight);
 //                mapUnit.setTag(new int[]{xPos, yPos});
                 mapUnitMatrix[xPos][yPos] = mapUnit;
             }

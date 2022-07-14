@@ -28,6 +28,8 @@ public class MapUnit {
     private int mUnitXY[] = new int[] {Integer.MIN_VALUE, Integer.MIN_VALUE};
     private float mScale = 1f;
     private final boolean mIsDebug = true;
+    private int mMapViewWidth = 0;
+    private int mMapViewHeight = 0;
 
     public MapUnit(int tag[], RectF range, float maxScale) {
         mMapRange = new RectF(range);
@@ -38,6 +40,12 @@ public class MapUnit {
         mPaint.setStyle(Paint.Style.STROKE);
         this.mMaxScale = maxScale;
         setTag(tag);
+    }
+
+    /**设置图块容器的宽高数据**/
+    public void setMapViewSize(int width, int height) {
+        mMapViewWidth = width;
+        mMapViewHeight = height;
     }
 
     public void offset(int dx, int dy) {
@@ -218,19 +226,25 @@ public class MapUnit {
         Rect rectDst = new Rect(0, 0, mTileBitmap.getWidth(), mTileBitmap.getHeight()); //小图覆盖的范围
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
-//        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST));  //todo 和可视区域相交，但是有一部分不相交的，会导致不相交的部分被空像素覆盖，导致画面不连续
-        canvas.drawBitmap(contentBmp, rectSrc, rectDst, paint);
+        //如果有些图块与mapview边沿重合
+        if (getRange().left < 0 || getRange().right >= mMapViewWidth || getRange().top < 0 || getRange().bottom >= mMapViewHeight) {
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 
-//        //cjztest 有没有板擦像素标题的痕迹？ 没有
-//        for (int y = 0; y < mTileBitmap.getHeight(); y ++) {
-//            for (int x = 0; x < mTileBitmap.getWidth(); x ++) {
-//                int pixel = mTileBitmap.getPixel(x, y);
-//                if (pixel == 0x01ABCDEF) {
-//                    Log.i("cjztest", "有好东西");
-//                }
-//            }
-//        }
+
+            Rect src = new Rect(rectSrc);
+            Rect dst = new Rect(rectDst);
+            src.offset(-(int) (mMapRange.left * mMaxScale), -(int) (mMapRange.top * mMaxScale));
+            //求相交矩形,src只剩下和dst相交的范围：  //todo 边界部分还是被清除了，可能要考虑clipPath进行处理
+            src.intersect(dst);
+            canvas.drawRect(src, paint);
+
+
+//            canvas.save();
+//            canvas.clipRect(src, paint)
+//            canvas.restore();
+        }
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OVER));  //todo 和可视区域相交，但是有一部分不相交的，会导致不相交的部分被空像素覆盖，导致画面不连续
+        canvas.drawBitmap(contentBmp, rectSrc, rectDst, paint);
 
         MapImageManager.saveTileImage(getTag(), mTileBitmap, mMaxScale);
         clearFastCacheBmp();
