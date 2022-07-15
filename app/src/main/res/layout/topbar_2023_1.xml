@@ -8,14 +8,22 @@
     <FrameLayout
         android:id="@+id/pdf_pad_topbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <!--    背景图始终在底层-->
-        <View
+
+        <FrameLayout
+            android:id="@+id/bg_view"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_marginTop="20dp"
-            android:background="@color/app_color_divider" />
+            android:layout_height="wrap_content"
+            android:paddingTop="20dp">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:background="@color/app_color_divider" />
+
+        </FrameLayout>
 
 
 
@@ -91,11 +99,18 @@
 
 
         <!--    标题栏要始终在顶层-->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="标题栏很蓝的啦" />
+        <FrameLayout
+            android:id="@+id/tv_title_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="标题栏很蓝的啦" />
+        </FrameLayout>
+
 
     </FrameLayout>
 
