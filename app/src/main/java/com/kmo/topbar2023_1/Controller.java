@@ -1,6 +1,7 @@
 package com.kmo.topbar2023_1;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,46 +56,74 @@ public class Controller {
         }
         // 如果中间菜单与左右两侧的菜单相距太近，把左右菜单的父控件位置上移，否则调整为保持水平  //todo 需要添加动画
         float limit = MeasurelUtils.convertDpToPixel(5, mContext);
+
+        Rect rectLeft = new Rect(mLeftTopView.getLeft(), mLeftTopView.getTop(), mLeftTopView.getRight(), mLeftTopView.getBottom());
+        Rect rectRight = new Rect(mRightTopView.getLeft(), mRightTopView.getTop(), mRightTopView.getRight(), mRightTopView.getBottom());
+        Rect rectLeftAndRight = new Rect(mLeftTopView.getLeft(), mLeftTopView.getTop(), mRightTopView.getRight(), mLeftTopView.getBottom());
+        Rect rectTitleBar = new Rect(mTitleBar.getLeft(), mTitleBar.getTop(), mTitleBar.getRight(), mTitleBar.getBottom());
+        Rect rectCenterBar = new Rect(mCenterTopView.getLeft(), mCenterTopView.getTop(), mCenterTopView.getRight(), mCenterTopView.getBottom());
+
+        //分情况讨论，两两组合：
         //如果主菜单左右两部分准备和中间部分发生交集，就把左右两部分推上和标题栏对齐
         if (mParent.getWidth() > 0 &&
                 (mCenterTopView.getLeft() - mLeftTopView.getRight() < limit || mRightTopView.getLeft() - mCenterTopView.getRight() < limit)) {
-            //移动到标题对齐
-            if (!mLeftRightViewParentIsOnTop) {
-                //设置左右菜单的高度为置顶
-                mLeftRightViewParent.setPadding(mLeftRightViewParent.getPaddingLeft(), 0, mLeftRightViewParent.getPaddingRight(), mLeftRightViewParent.getPaddingBottom());
-                //设置背景margin和高度为置顶
-                mBgView.setPadding(mBgView.getPaddingLeft(), 0,
+            Log.e("cjztest", "主菜单与左右菜单相交");
+            if (rectTitleBar.left < rectLeft.right || rectTitleBar.right > rectRight.left) {
+                Log.e("cjztest", "主菜单与左右菜单相交，且与标题栏相交");
+                mLeftRightViewParent.setPadding(mLeftRightViewParent.getPaddingLeft(), mTitleBar.getBottom(), mLeftRightViewParent.getPaddingRight(), mLeftRightViewParent.getPaddingBottom());
+                mBgView.setPadding(mBgView.getPaddingLeft(), mTitleBar.getBottom(),
                         mBgView.getPaddingRight(), mBgView.getPaddingBottom());
-                //标记已设置完成
-                mLeftRightViewParentIsOnTop = true;
-            } else {  //todo bug
-                if (mParent.getWidth() > 0 &&
-                        (mTitleBar.getLeft() - mLeftTopView.getRight() < limit || mRightTopView.getLeft() - mTitleBar.getRight() < limit)) { //todo 如果再继续收紧到和标题栏接近相交时，整个菜单栏在维持两个左右菜单在第一行的同时，下移到标题栏下方
-                    //设置左右菜单的高度为与中间菜单对齐
-                    mLeftRightViewParent.setPadding(mLeftRightViewParent.getPaddingLeft(), mCenterTopView.getTop(),
-                            mLeftRightViewParent.getPaddingRight(), mLeftRightViewParent.getPaddingBottom());
-                    //设置背景margin和高度为置顶
-                    mBgView.setPadding(mBgView.getPaddingLeft(), mCenterTopView.getTop(),
-                            mBgView.getPaddingRight(), mBgView.getPaddingBottom());
-                    //让中间菜单下移
-                    mCenterTopView.setPadding(mCenterTopView.getPaddingLeft(), mLeftRightViewParent.getBottom(),
-                            mCenterTopView.getPaddingRight(), mCenterTopView.getPaddingBottom());
-                } else {
-                    mLeftRightViewParentIsOnTop = false;
-                }
-            }
-        } else { //否则就重新下放
-            if (mLeftRightViewParentIsOnTop) {
-                //设置左右菜单的高度为与中间菜单对齐
-                mLeftRightViewParent.setPadding(mLeftRightViewParent.getPaddingLeft(), mCenterTopView.getTop(),
-                        mLeftRightViewParent.getPaddingRight(), mLeftRightViewParent.getPaddingBottom());
-                //设置背景margin和高度为置顶
-                mBgView.setPadding(mBgView.getPaddingLeft(), mCenterTopView.getTop(),
+            } else {
+                Log.e("cjztest", "主菜单与左右菜单相交，但不与标题栏相交");
+                mLeftRightViewParent.setPadding(mLeftRightViewParent.getPaddingLeft(), mTitleBar.getTop(), mLeftRightViewParent.getPaddingRight(), mLeftRightViewParent.getPaddingBottom());
+                mBgView.setPadding(mBgView.getPaddingLeft(), mTitleBar.getTop(),
                         mBgView.getPaddingRight(), mBgView.getPaddingBottom());
-                //标记已设置完成
-                mLeftRightViewParentIsOnTop = false;
             }
+            mCenterTopView.setPadding(mCenterTopView.getPaddingLeft(), mLeftRightViewParent.getBottom(),
+                    mCenterTopView.getPaddingRight(), mCenterTopView.getPaddingBottom());
+        } else {
+            Log.e("cjztest", "主菜单不与左右菜单相交");
+            if (rectTitleBar.left < rectLeft.right || rectTitleBar.right > rectRight.left) {
+                Log.e("cjztest", "主菜单不与左右菜单相交，但与标题栏相交");
+                mCenterTopView.setPadding(mCenterTopView.getPaddingLeft(), mTitleBar.getBottom(),
+                        mCenterTopView.getPaddingRight(), mCenterTopView.getPaddingBottom());
+            } else {
+                Log.e("cjztest", "主菜单不与左右菜单相交，也不与标题栏相交");
+                mCenterTopView.setPadding(mCenterTopView.getPaddingLeft(), mTitleBar.getTop(),
+                        mCenterTopView.getPaddingRight(), mCenterTopView.getPaddingBottom());
+            }
+            //设置左右菜单的高度为与中间菜单对齐
+            mLeftRightViewParent.setPadding(mLeftRightViewParent.getPaddingLeft(), mCenterTopView.getTop(),
+                    mLeftRightViewParent.getPaddingRight(), mLeftRightViewParent.getPaddingBottom());
+            //设置背景margin和高度为置顶
+            mBgView.setPadding(mBgView.getPaddingLeft(), mCenterTopView.getTop(),
+                    mBgView.getPaddingRight(), mBgView.getPaddingBottom());
         }
-    }
+//        //左右两侧菜单与标题栏位置相交
+//        if (rectLeft.intersects(rectTitleBar.left, rectTitleBar.top, rectTitleBar.right, rectTitleBar.bottom) ||
+//                rectRight.intersects(rectTitleBar.left, rectTitleBar.top, rectTitleBar.right, rectTitleBar.bottom)) {
+//
+//        }
 
+
+//        //左右两侧菜单的外接矩形：
+
+//        //与中间菜单相交吗？
+//        if (rectLeft.intersects(rectCenterBar.left, rectCenterBar.top, rectCenterBar.right, rectCenterBar.bottom) ||
+//                rectRight.intersects(rectCenterBar.left, rectCenterBar.top, rectCenterBar.right, rectCenterBar.bottom)) {
+//                //设置左右菜单的高度为置顶
+//                mLeftRightViewParent.setPadding(mLeftRightViewParent.getPaddingLeft(), 0, mLeftRightViewParent.getPaddingRight(), mLeftRightViewParent.getPaddingBottom());
+//                //设置背景margin和高度为置顶
+//                mBgView.setPadding(mBgView.getPaddingLeft(), 0,
+//                        mBgView.getPaddingRight(), mBgView.getPaddingBottom());
+//        } else {
+//            //设置左右菜单的高度为与中间菜单对齐
+//            mLeftRightViewParent.setPadding(mLeftRightViewParent.getPaddingLeft(), mCenterTopView.getTop(),
+//                    mLeftRightViewParent.getPaddingRight(), mLeftRightViewParent.getPaddingBottom());
+//            //设置背景margin和高度为置顶
+//            mBgView.setPadding(mBgView.getPaddingLeft(), mCenterTopView.getTop(),
+//                    mBgView.getPaddingRight(), mBgView.getPaddingBottom());
+//        }
+//    }
+    }
 }

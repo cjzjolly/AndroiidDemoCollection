@@ -20,7 +20,7 @@
 
             <View
                 android:layout_width="match_parent"
-                android:layout_height="80dp"
+                android:layout_height="120dp"
                 android:background="@color/app_color_divider" />
 
         </FrameLayout>
@@ -72,27 +72,29 @@
                 android:text="模拟的中间按钮 A B C D"
                 android:background="@color/app_color_green"
                 />
-        </FrameLayout>
 
-
-
-
-
-        <!-- 二级菜单 -->
-        <FrameLayout
-            android:id="@+id/subMenu"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="50dp">
-
-            <TextView
+            <!-- 二级菜单 -->
+            <FrameLayout
+                android:id="@+id/subMenu"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="模拟的二级菜单 A B C D"
-                android:background="@color/app_color_green"
-                />
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="50dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="模拟的二级菜单 A B C D"
+                    android:background="@color/app_color_green"
+                    />
+            </FrameLayout>
         </FrameLayout>
+
+
+
+
+
+
 
 
 
@@ -101,7 +103,8 @@
         <!--    标题栏要始终在顶层-->
         <FrameLayout
             android:id="@+id/tv_title_bar"
-            android:layout_width="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
             <TextView
