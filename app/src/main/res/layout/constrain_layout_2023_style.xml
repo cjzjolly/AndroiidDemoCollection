@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/container">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:background="@drawable/comp_bottom_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".MainActivity">
+
+
+        <androidx.constraintlayout.widget.Placeholder
+            android:id="@+id/title_name_placeholder_1"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:placeholder_emptyVisibility="gone" />
+
+
+        <FrameLayout
+            android:id="@+id/left_function"
+            android:layout_width="248dp"
+            android:layout_height="48dp"
+            android:background="@color/design_default_color_error"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title_name_placeholder_1">
+
+            <TextView
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="文件左边功能区" />
+
+        </FrameLayout>
+
+
+        <FrameLayout
+            android:id="@+id/right_function"
+            android:layout_width="248dp"
+            android:layout_height="48dp"
+            android:background="@color/design_default_color_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title_name_placeholder_1">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="文件左边功能区" />
+
+        </FrameLayout>
+
+
+        <androidx.constraintlayout.widget.Placeholder
+            android:id="@+id/title_name_placeholder_2"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title_name_placeholder_1"
+            app:placeholder_emptyVisibility="gone" />
+
+        <androidx.constraintlayout.widget.Placeholder
+            android:id="@+id/menubar_placeholder_1"
+            android:layout_width="250dp"
+            android:layout_height="48dp"
+            android:background="@color/design_default_color_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title_name_placeholder_1"
+            app:placeholder_emptyVisibility="gone" />
+
+
+        <androidx.constraintlayout.widget.Placeholder
+            android:id="@+id/menubar_placeholder_2"
+            android:layout_width="250dp"
+            android:layout_height="48dp"
+            android:background="@color/design_default_color_secondary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/left_function"
+            app:placeholder_emptyVisibility="gone" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/menubar_placeholder_2"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:background="@color/design_default_color_secondary_variant">
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="tab功能区域"/>
+        </FrameLayout>
+
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="我是一个文档"
+            android:textSize="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id="@+id/menubar"
+            android:layout_width="150dp"
+            android:layout_height="48dp"
+            android:gravity="center"
+            android:text="菜单栏"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <RadioButton
+                android:id="@+id/radio_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1" />
+
+            <RadioButton
+                android:id="@+id/radio_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2" />
+
+            <RadioButton
+                android:id="@+id/radio_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3" />
+        </RadioGroup>
+
+    </FrameLayout>
+
+
+
+
+</androidx.appcompat.widget.LinearLayoutCompat>

@@ -99,6 +99,9 @@ public class Controller {
             mBgView.setPadding(mBgView.getPaddingLeft(), mCenterTopView.getTop(),
                     mBgView.getPaddingRight(), mBgView.getPaddingBottom());
         }
+        //二级菜单随着主菜单的上下位移移动
+        mSubMenu.setPadding(mSubMenu.getPaddingLeft(), mCenterTopView.getBottom(),
+                mSubMenu.getPaddingRight(), mSubMenu.getPaddingBottom());
 //        //左右两侧菜单与标题栏位置相交
 //        if (rectLeft.intersects(rectTitleBar.left, rectTitleBar.top, rectTitleBar.right, rectTitleBar.bottom) ||
 //                rectRight.intersects(rectTitleBar.left, rectTitleBar.top, rectTitleBar.right, rectTitleBar.bottom)) {

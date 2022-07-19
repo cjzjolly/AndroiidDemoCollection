@@ -3,12 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/fl_total"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#DDDDDD">
 
     <FrameLayout
         android:id="@+id/pdf_pad_topbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp">
 
         <!--    背景图始终在底层-->
 
@@ -21,7 +24,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
-                android:background="@color/app_color_divider" />
+                android:background="@drawable/gradual" />
 
         </FrameLayout>
 
@@ -35,22 +38,148 @@
             android:layout_height="wrap_content"
             android:paddingTop="20dp">
 
-            <TextView
+            <LinearLayout
                 android:id="@+id/leftTopView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="模拟的左侧按钮"
-                android:background="@color/app_color_green"
-                />
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
+                android:orientation="horizontal">
 
-            <TextView
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp">
+                    <ImageButton
+                        android:layout_width="14.53dp"
+                        android:layout_height="14.52dp"
+                        android:layout_gravity="center"
+                        android:background="@color/app_color_transparent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pdf_left_top_close" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp">
+                    <ImageButton
+                        android:layout_width="14.53dp"
+                        android:layout_height="14.52dp"
+                        android:layout_gravity="center"
+                        android:background="@color/app_color_transparent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pdf_left_top_close" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp">
+                    <ImageButton
+                        android:layout_width="14.53dp"
+                        android:layout_height="14.52dp"
+                        android:layout_gravity="center"
+                        android:background="@color/app_color_transparent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pdf_left_top_close" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp">
+                    <ImageButton
+                        android:layout_width="14.53dp"
+                        android:layout_height="14.52dp"
+                        android:layout_gravity="center"
+                        android:background="@color/app_color_transparent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pdf_left_top_close" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp">
+                    <ImageButton
+                        android:layout_width="14.53dp"
+                        android:layout_height="14.52dp"
+                        android:layout_gravity="center"
+                        android:background="@color/app_color_transparent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pdf_left_top_close" />
+                </FrameLayout>
+
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/rightTopView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="模拟的右侧侧按钮"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="1dp"
+                android:layout_marginBottom="1dp"
                 android:layout_gravity="right"
-                android:background="@color/app_color_green"
-                />
+                android:orientation="horizontal">
+
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp">
+                    <ImageButton
+                        android:layout_width="14.53dp"
+                        android:layout_height="14.52dp"
+                        android:layout_gravity="center"
+                        android:background="@color/app_color_transparent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pdf_left_top_close" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp">
+                    <ImageButton
+                        android:layout_width="14.53dp"
+                        android:layout_height="14.52dp"
+                        android:layout_gravity="center"
+                        android:background="@color/app_color_transparent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pdf_left_top_close" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp">
+                    <ImageButton
+                        android:layout_width="14.53dp"
+                        android:layout_height="14.52dp"
+                        android:layout_gravity="center"
+                        android:background="@color/app_color_transparent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pdf_left_top_close" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="42dp"
+                    android:layout_height="42dp">
+                    <ImageButton
+                        android:layout_width="14.53dp"
+                        android:layout_height="14.52dp"
+                        android:layout_gravity="center"
+                        android:background="@color/app_color_transparent"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/pdf_left_top_close" />
+                </FrameLayout>
+
+                <Button
+                    android:layout_width="50dp"
+                    android:layout_height="26dp"
+                    android:background="@drawable/bg_shape_1"
+                    android:textColor="#111317"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginRight="12dp"
+                    android:text="分享"/>
+
+            </LinearLayout>
 
         </FrameLayout>
 
@@ -73,26 +202,25 @@
                 android:background="@color/app_color_green"
                 />
 
-            <!-- 二级菜单 -->
-            <FrameLayout
-                android:id="@+id/subMenu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="50dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="模拟的二级菜单 A B C D"
-                    android:background="@color/app_color_green"
-                    />
-            </FrameLayout>
         </FrameLayout>
 
 
 
+        <!-- 二级菜单 -->
+        <FrameLayout
+            android:id="@+id/subMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="50dp">
 
+            <TextView
+                android:layout_width="1080dp"
+                android:layout_height="wrap_content"
+                android:text="模拟的二级菜单 A B C D"
+                android:background="@color/app_color_green"
+                />
+        </FrameLayout>
 
 
 
@@ -111,7 +239,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="标题栏很蓝的啦" />
+                android:textSize="11sp"
+                android:text="标题栏很蓝的啦"
+                android:textColor="#333840"/>
         </FrameLayout>
 
 
