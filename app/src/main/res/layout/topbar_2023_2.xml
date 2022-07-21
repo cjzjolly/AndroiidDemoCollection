@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fl_total"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#DDDDDD">
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/pdf_pad_topbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#DDDDDD">
+
+        <!--    背景图始终在底层-->
+        <FrameLayout
+            android:id="@+id/bg_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_title_bar">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:background="@drawable/gradual" />
+
+        </FrameLayout>
+
+        <!--    标题栏要始终在顶层-->
+        <FrameLayout
+            android:id="@+id/tv_title_bar"
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_alignParentTop="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:textSize="11sp"
+                android:text="标题栏"
+                android:textColor="#333840"/>
+        </FrameLayout>
+
+        <!-- 开始、插入、查看的按钮-->
+        <FrameLayout
+            android:id="@+id/centerTopView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_below="@+id/tv_title_bar"
+            android:layout_centerInParent="true">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="模拟的中间按钮 A B C D"
+                android:background="@color/app_color_green"
+                />
+
+        </FrameLayout>
+
+        <!--        开始、插入、查看左右两侧的按钮-->
+        <LinearLayout
+            android:id="@+id/leftTopView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignTop="@+id/centerTopView"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <ImageButton
+                    android:layout_width="14.53dp"
+                    android:layout_height="14.52dp"
+                    android:layout_gravity="center"
+                    android:background="@color/app_color_transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pdf_left_top_close" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <ImageButton
+                    android:layout_width="14.53dp"
+                    android:layout_height="14.52dp"
+                    android:layout_gravity="center"
+                    android:background="@color/app_color_transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pdf_left_top_close" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <ImageButton
+                    android:layout_width="14.53dp"
+                    android:layout_height="14.52dp"
+                    android:layout_gravity="center"
+                    android:background="@color/app_color_transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pdf_left_top_close" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <ImageButton
+                    android:layout_width="14.53dp"
+                    android:layout_height="14.52dp"
+                    android:layout_gravity="center"
+                    android:background="@color/app_color_transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pdf_left_top_close" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <ImageButton
+                    android:layout_width="14.53dp"
+                    android:layout_height="14.52dp"
+                    android:layout_gravity="center"
+                    android:background="@color/app_color_transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pdf_left_top_close" />
+            </FrameLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/rightTopView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/centerTopView"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <ImageButton
+                    android:layout_width="14.53dp"
+                    android:layout_height="14.52dp"
+                    android:layout_gravity="center"
+                    android:background="@color/app_color_transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pdf_left_top_close" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <ImageButton
+                    android:layout_width="14.53dp"
+                    android:layout_height="14.52dp"
+                    android:layout_gravity="center"
+                    android:background="@color/app_color_transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pdf_left_top_close" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <ImageButton
+                    android:layout_width="14.53dp"
+                    android:layout_height="14.52dp"
+                    android:layout_gravity="center"
+                    android:background="@color/app_color_transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pdf_left_top_close" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="42dp"
+                android:layout_height="42dp">
+                <ImageButton
+                    android:layout_width="14.53dp"
+                    android:layout_height="14.52dp"
+                    android:layout_gravity="center"
+                    android:background="@color/app_color_transparent"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/pdf_left_top_close" />
+            </FrameLayout>
+
+            <Button
+                android:layout_width="50dp"
+                android:layout_height="26dp"
+                android:background="@drawable/bg_shape_1"
+                android:textColor="#111317"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
+                android:text="分享"/>
+
+        </LinearLayout>
+
+        <!-- 二级菜单 -->
+        <FrameLayout
+            android:id="@+id/subMenu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_below="@+id/leftTopView">
+
+            <TextView
+                android:layout_width="1080dp"
+                android:layout_height="wrap_content"
+                android:text="模拟的二级菜单 A B C D"
+                android:background="@color/app_color_green"
+                />
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/btn_test"
+            android:text="test压缩layout宽度"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            />
+
+        <Button
+            android:id="@+id/btn_test2"
+            android:text="test增加layout宽度"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/btn_test"
+            />
+
+
+    </RelativeLayout>
+
+
+</FrameLayout>

@@ -47,7 +47,7 @@
         </activity>
         <activity android:name="com.cjz.demo.MainActivity">
         </activity>
-        <activity android:name="com.kmo.listViewInListView.ListViewInRecyclerView">
+        <activity android:name="com.kmo.topbar2023_2.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
