@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -212,10 +213,10 @@ public class MapUnit {
                 mMapRange, null);
     }
 
-    /**把白板的内容绘制到瓦片中**/
+    /**把白板的内容绘制到瓦片中 **/
     public void drawBmp(Bitmap contentBmp) {
         //没有图块载体，创建一个
-        if (mTileBitmap == null) {
+        if (mTileBitmap == null) { //cjzmark todo
             mTileBitmap = Bitmap.createBitmap((int) (mMapRange.width() / mScale * mMaxScale),
                     (int) (mMapRange.height() / mScale * mMaxScale), Bitmap.Config.ARGB_8888);
         }
@@ -231,12 +232,22 @@ public class MapUnit {
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 
 
-            Rect src = new Rect(rectSrc);
-            Rect dst = new Rect(rectDst);
-            src.offset(-(int) (mMapRange.left * mMaxScale), -(int) (mMapRange.top * mMaxScale));
-            //求相交矩形,src只剩下和dst相交的范围：  //todo 边界部分还是被清除了，可能要考虑clipPath进行处理
-            src.intersect(dst);
-            canvas.drawRect(src, paint);
+//            Rect src = new Rect(rectSrc);
+//            Rect dst = new Rect(rectDst);
+//            src.offset(-(int) (mMapRange.left * mMaxScale), -(int) (mMapRange.top * mMaxScale));
+//            //求相交矩形,src只剩下和dst相交的范围：  //todo 边界部分还是被清除了，可能要考虑clipPath进行处理
+//            src.intersect(dst);
+            //todo 求出当前mapUnit被显示的范围，设定为裁剪范围：
+            RectF rectF = new RectF();
+
+            Path path = new Path();
+            path.addRect(new RectF(src.left, src.top, src.right, src.bottom), Path.Direction.CCW);
+            canvas.save();
+            canvas.clipPath(path);
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR); //避免相同内容有重复叠加绘制的问题
+            canvas.drawBitmap(contentBmp, rectSrc, rectDst, null);
+            canvas.restore();
+//            canvas.drawRect(src, paint);
 
 
 //            canvas.save();
@@ -244,7 +255,8 @@ public class MapUnit {
 //            canvas.restore();
         }
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OVER));  //todo 和可视区域相交，但是有一部分不相交的，会导致不相交的部分被空像素覆盖，导致画面不连续
-        canvas.drawBitmap(contentBmp, rectSrc, rectDst, paint);
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR); //避免相同内容有重复叠加绘制的问题
+        canvas.drawBitmap(contentBmp, rectSrc, rectDst, null);
 
         MapImageManager.saveTileImage(getTag(), mTileBitmap, mMaxScale);
         clearFastCacheBmp();
