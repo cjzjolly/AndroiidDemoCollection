@@ -141,7 +141,7 @@ public class DrawView extends View {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setAntiAlias(true);
-        int color = 0x80000000;
+        int color = 0xFF000000;
         //随机颜色
         color |= ((int) (Math.random() * 255 + 1) << 16);
         color |= ((int) (Math.random() * 255 + 1) << 8);

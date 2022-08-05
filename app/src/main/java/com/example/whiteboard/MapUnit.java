@@ -239,9 +239,14 @@ public class MapUnit {
 //            src.intersect(dst);
             //todo 求出当前mapUnit被显示的范围，设定为裁剪范围：
             RectF rectF = new RectF();
+            rectF.left = -getRange().left * mMaxScale;
+            rectF.right = (getRange().right - mMapViewWidth) * mMaxScale;
+            rectF.top = -getRange().top * mMaxScale;
+            rectF.bottom = (getRange().bottom - mMapViewHeight) * mMaxScale;
 
             Path path = new Path();
-            path.addRect(new RectF(src.left, src.top, src.right, src.bottom), Path.Direction.CCW);
+//            path.addRect(new RectF(src.left, src.top, src.right, src.bottom), Path.Direction.CCW);
+            path.addRect(rectF, Path.Direction.CCW);
             canvas.save();
             canvas.clipPath(path);
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR); //避免相同内容有重复叠加绘制的问题
