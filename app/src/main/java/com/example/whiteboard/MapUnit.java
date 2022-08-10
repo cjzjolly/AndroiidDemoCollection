@@ -239,10 +239,10 @@ public class MapUnit {
 //            src.intersect(dst);
             //todo 求出当前mapUnit被显示的范围，设定为裁剪范围：
             RectF rectF = new RectF();
-            rectF.left = -getRange().left * mMaxScale;
-            rectF.right = (getRange().right - mMapViewWidth) * mMaxScale;
-            rectF.top = -getRange().top * mMaxScale;
-            rectF.bottom = (getRange().bottom - mMapViewHeight) * mMaxScale;
+            rectF.left = (0 - getRange().left) / (float) getRange().width() * mTileBitmap.getWidth();
+            rectF.right = (getRange().right - mMapViewWidth) / (float) getRange().width() * mTileBitmap.getWidth();
+            rectF.top = (0 - getRange().top) / (float) getRange().width() * mTileBitmap.getHeight();
+            rectF.bottom = (getRange().bottom - mMapViewHeight) / (float) getRange().width() * mTileBitmap.getHeight();
 
             Path path = new Path();
 //            path.addRect(new RectF(src.left, src.top, src.right, src.bottom), Path.Direction.CCW);
