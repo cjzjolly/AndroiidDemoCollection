@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import com.example.cameraXDemo.CameraXDemoActivity_1;
 import com.example.dctDemo.DCTTestDemo;
 import com.example.effectByScrollInOut.EffectDemoActivity;
+import com.example.eldestBmpOutCache.TestActivity;
 import com.example.pdfReader.PdfReaderDemo;
 import com.example.photoCutter.CutterActivity;
 import com.example.photoSelector.PhotoSelectorPageActivity;
@@ -91,6 +92,7 @@ public class MainActivity extends Activity {
         sidingMenuBtn.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, SlideRecyclerViewActivity.class));
         });
+        linearLayoutContainer.addView(sidingMenuBtn);
         //可以放大缩放的白板：
         Button whiteboardBtn = new Button(this);
         whiteboardBtn.setText("可以放大缩放的白板");
@@ -98,5 +100,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, com.example.whiteboard.MainActivity.class));
         });
         linearLayoutContainer.addView(whiteboardBtn);
+        //最旧条目去除算法测试：
+        Button eldestOutTest = new Button(this);
+        eldestOutTest.setText("最旧条目去除算法测试");
+        eldestOutTest.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, TestActivity.class));
+        });
+        linearLayoutContainer.addView(eldestOutTest);
     }
 }
