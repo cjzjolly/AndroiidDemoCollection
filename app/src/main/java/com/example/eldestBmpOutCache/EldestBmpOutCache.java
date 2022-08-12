@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EldestBmpOutCache {
-    private final int mMaxBytes = 5 * 1024 * 1024; //最多存储20MB数据
+    private final int mMaxBytes = 20 * 1024 * 1024; //最多存储20MB数据
     private int mCurrentBytes = 0;
     private List<Item> mItemList = new ArrayList<>();
     private Object mReadWriteLock = new Object();
@@ -59,9 +59,9 @@ public class EldestBmpOutCache {
         //如果存储容量不够，清理最旧的图片：
         synchronized (mReadWriteLock) {
             if (mCurrentBytes + needSize > mMaxBytes) {
-                long minTime = Integer.MAX_VALUE;
+                long minTime = Long.MAX_VALUE;
                 int minTimeItemIndex = -1;
-                for (int i = mItemList.size() - 1; i >= 0; i--) {
+                for (int i = 0; i < mItemList.size(); i++) {
                     Item item = mItemList.get(i);
                     if (item.getItemCreateTime() < minTime) {
                         minTime = item.getItemCreateTime();
