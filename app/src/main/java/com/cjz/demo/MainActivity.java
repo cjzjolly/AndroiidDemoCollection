@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.example.cameraXDemo.CameraXDemoActivity_1;
 import com.example.dctDemo.DCTTestDemo;
+import com.example.demosAboutCanvas.ChangeColorAfterDraw;
 import com.example.effectByScrollInOut.EffectDemoActivity;
 import com.example.eldestBmpOutCache.TestActivity;
 import com.example.pdfReader.PdfReaderDemo;
@@ -107,5 +108,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, TestActivity.class));
         });
         linearLayoutContainer.addView(eldestOutTest);
+        //在Canvas绘制后更换颜色测试：
+        Button btnChangeColorAfterDrawTest = new Button(this);
+        btnChangeColorAfterDrawTest.setText("在Canvas绘制后更换颜色测试");
+        btnChangeColorAfterDrawTest.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, ChangeColorAfterDraw.class));
+        });
+        linearLayoutContainer.addView(btnChangeColorAfterDrawTest);
     }
 }
