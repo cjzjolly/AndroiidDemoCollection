@@ -23,7 +23,7 @@ public class SingleChoiceRecyclerActivity extends Activity {
         List<DataItem> labelTest = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
             DataItem dataItem = new DataItem();
-            dataItem.mName = "label_" + i;
+            dataItem.mName = "" + i;
             labelTest.add(dataItem);
         }
         mRv = findViewById(R.id.rv);

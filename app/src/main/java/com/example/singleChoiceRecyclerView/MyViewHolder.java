@@ -13,7 +13,7 @@ import com.example.piccut.R;
 
 /**UI条目**/
 class MyViewHolder extends RecyclerView.ViewHolder {
-    private DataItem mDataItem = null;
+    public DataItem mDataItem = null;
     public TextView tv;
     public ImageView iv;
     public CheckBox cb;
@@ -23,14 +23,6 @@ class MyViewHolder extends RecyclerView.ViewHolder {
         tv = itemView.findViewById(R.id.tv_selector_pic_index);
         iv = itemView.findViewById(R.id.iv_selector_pic_content);
         cb = itemView.findViewById(R.id.cb_set_selected);
-        /**点击选择时修改对应UI条目的样式，并更改数据表对应条目**/
-        cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                mDataItem.mIsChecked = isChecked;
-                tv.setBackgroundColor(mDataItem.mIsChecked ? 0xFF4040FF : 0xFFAAAAAA);
-            }
-        });
     }
 
 
