@@ -15,12 +15,14 @@ import com.example.piccut.R;
 class MyViewHolder extends RecyclerView.ViewHolder {
     public DataItem mDataItem = null;
     public TextView tv;
+    public TextView multiChoiceIndex;
     public ImageView iv;
     public CheckBox cb;
 
     public MyViewHolder(View itemView) {
         super(itemView);
         tv = itemView.findViewById(R.id.tv_selector_pic_index);
+        multiChoiceIndex = itemView.findViewById(R.id.tv_selector_multi_choice);
         iv = itemView.findViewById(R.id.iv_selector_pic_content);
         cb = itemView.findViewById(R.id.cb_set_selected);
     }
