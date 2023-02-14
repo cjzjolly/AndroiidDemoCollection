@@ -20,7 +20,7 @@ import com.example.photoSelector.PhotoSelectorPageActivity;
 import com.example.photoSelectorByRecycler.PicSelectorByRV;
 import com.example.picCutview.PicCutActivity;
 import com.example.sidingMenuRecyclerView.SlideRecyclerViewActivity;
-import com.example.singleChoiceRecyclerView.SingleChoiceRecyclerActivity;
+import com.example.singleChoiceRecyclerView.SingleOrMultiChoiceRecyclerActivity;
 
 public class MainActivity extends Activity {
 
@@ -119,7 +119,7 @@ public class MainActivity extends Activity {
         Button btnSingleChoiceRV = new Button(this);
         btnSingleChoiceRV.setText("单选recycler view");
         btnSingleChoiceRV.setOnClickListener(v -> {
-            startActivity(new Intent(MainActivity.this, SingleChoiceRecyclerActivity.class));
+            startActivity(new Intent(MainActivity.this, SingleOrMultiChoiceRecyclerActivity.class));
         });
         linearLayoutContainer.addView(btnSingleChoiceRV);
     }

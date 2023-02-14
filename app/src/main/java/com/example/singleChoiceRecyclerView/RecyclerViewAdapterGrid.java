@@ -21,12 +21,30 @@ class RecyclerViewAdapterGrid<T> extends RecyclerView.Adapter<MyViewHolder> {
     public List<T> mDataList;
     private List<T> mBeSelectedList = new ArrayList<>();
     private List<MyViewHolder> mViewHolders = new ArrayList<>();
+
     /**是否多选模式**/
-    private boolean mIsMultiChoiceMode = true;
+    private boolean mIsMultiChoiceMode = false;
 
     public RecyclerViewAdapterGrid(Context context, List<T> stringList) {
         this.context = context;
         this.mDataList = stringList;
+    }
+
+    /**设置是否启用多选模式
+     * @param isMultiChoiceMode 是否多选**/
+    public void setIsMultiChoiceMode(boolean isMultiChoiceMode) {
+        this.mIsMultiChoiceMode = isMultiChoiceMode;
+        //状态切换前，进行一次数据清理
+        //清理单选状态:
+        for (T item : mDataList) {
+            ((DataItem) item).mIsChecked = false;
+        }
+        for (MyViewHolder holder : mViewHolders) {
+            holder.cb.setChecked(false);
+            holder.multiChoiceIndex.setText("");
+        }
+        mBeSelectedList.clear(); //清理被多选的数据
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -46,6 +64,8 @@ class RecyclerViewAdapterGrid<T> extends RecyclerView.Adapter<MyViewHolder> {
             holder.tv.setBackgroundColor(dataItem.mIsChecked ? 0xFF4040FF : 0xFFAAAAAA);
             holder.setDataItem(dataItem);
             holder.cb.setChecked(dataItem.mIsChecked);
+            holder.cb.setVisibility(View.VISIBLE);
+            holder.multiChoiceIndex.setVisibility(View.GONE);
 
             /**点击选择时修改对应UI条目的样式，并更改数据表对应条目**/
             holder.cb.setOnClickListener(v -> {
