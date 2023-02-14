@@ -34,6 +34,9 @@ class RecyclerViewAdapterGrid<T> extends RecyclerView.Adapter<MyViewHolder> {
      * @param isMultiChoiceMode 是否多选**/
     public void setIsMultiChoiceMode(boolean isMultiChoiceMode) {
         this.mIsMultiChoiceMode = isMultiChoiceMode;
+        if (isMultiChoiceMode == mIsMultiChoiceMode) { //状态一致，不执行清理
+            return;
+        }
         //状态切换前，进行一次数据清理
         //清理单选状态:
         for (T item : mDataList) {
