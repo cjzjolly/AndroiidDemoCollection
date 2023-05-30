@@ -288,6 +288,11 @@ public class PhotoCutter extends View {
         resetView();
     }
 
+    /**todo 设置旋转量**/
+    public void rotate(int rotate) {
+        setRotation(rotate); //整个控件进行旋转
+    }
+
     /**设置选择点**/
     public void setSelectorPointOnPhoto(PointF leftTop, PointF rightTop,
                                         PointF leftBottom, PointF rightBottom) {
@@ -408,30 +413,59 @@ public class PhotoCutter extends View {
             Log.e(TAG, "当前没有用户裁剪path");
             return null;
         }
-        //算出裁剪框的裁剪范围的外接矩形:
+//        //算出裁剪框的裁剪范围的外接矩形:
+//        float offsetX = ((mWidth - mBitmap.getWidth() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
+//        float offsetY = ((mHeight - mBitmap.getHeight() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
+//        float left = Math.min(mVectorPoint[0].x - offsetX, mVectorPoint[3].x - offsetX);
+//        float top = Math.min(mVectorPoint[0].y - offsetY, mVectorPoint[1].y - offsetY);
+//        float right = Math.max(mVectorPoint[1].x - offsetX, mVectorPoint[2].x - offsetX);
+//        float bottom = Math.max(mVectorPoint[2].y - offsetY, mVectorPoint[3].y - offsetY);
+//        Rect rect = new Rect((int) left, (int) top, (int) right, (int) bottom);
+//        Bitmap bitmap = Bitmap.createBitmap((int) (rect.width() * (1f / mScale)), (int) (rect.height() * (1f / mScale)), Bitmap.Config.ARGB_8888);
+//        Canvas canvas = new Canvas(bitmap);
+////        canvas.translate((int) (-left * (1f / mScale)), (int) (-top * (1f / mScale))); //抵消位移
+//        //画布挖洞
+//        Matrix pathMatrix = new Matrix();
+////        pathMatrix.setTranslate(-left, -top); //以画布为静止参考系，那么反向数值移动即可抵消位移
+//        pathMatrix.postScale(1f / mScale, 1f / mScale);
+//        mCutterClipPath.transform(pathMatrix); //todo 小心资源冲突
+//        canvas.drawColor(Color.BLACK);
+//        canvas.clipPath(mCutterClipPath);
+//        canvas.drawColor(Color.RED);
+//        //绘制图片
+//        Matrix bmpMatrix = new Matrix();
+//        //重点:因为传入的top值是外接矩形在控件中的位置，因此必须先减去里面包含的控件的高度相关的数量，否则位置会有所偏差
+//        bmpMatrix.setTranslate((int) (-left * (1f / mScale)),
+//                -(top - (mHeight / 2f - mBitmap.getHeight() / 2f * mScale)) * (1f / mScale));
+////        canvas.drawBitmap(mBitmap, bmpMatrix, null);
+//        return bitmap;
+//        //todo 有bug，照片出不来
+
         float offsetX = ((mWidth - mBitmap.getWidth() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
-        float left = Math.min(mVectorPoint[0].x - offsetX, mVectorPoint[3].x);
+        float offsetY = ((mHeight - mBitmap.getHeight() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
+
+        float left = Math.min(mVectorPoint[0].x, mVectorPoint[3].x);
         float top = Math.min(mVectorPoint[0].y, mVectorPoint[1].y);
-        float right = Math.max(mVectorPoint[1].x - offsetX, mVectorPoint[2].x);
+        float right = Math.max(mVectorPoint[1].x, mVectorPoint[2].x);
         float bottom = Math.max(mVectorPoint[2].y, mVectorPoint[3].y);
         Rect rect = new Rect((int) left, (int) top, (int) right, (int) bottom);
         Bitmap bitmap = Bitmap.createBitmap((int) (rect.width() * (1f / mScale)), (int) (rect.height() * (1f / mScale)), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-//        canvas.translate((int) (-left * (1f / mScale)), (int) (-top * (1f / mScale))); //抵消位移
-        //画布挖洞
+        canvas.translate((int) (-left * (1f / mScale)), (int) (-top * (1f / mScale))); //step 0 按照path现在的外接矩形的方位，进行偏移。例如距离左边多少距离
+
         Matrix pathMatrix = new Matrix();
-        pathMatrix.setTranslate(-left, -top); //以画布为静止参考系，那么反向数值移动即可抵消位移
         pathMatrix.postScale(1f / mScale, 1f / mScale);
-        mCutterClipPath.transform(pathMatrix); //todo 小心资源冲突
+        mCutterClipPath.transform(pathMatrix);
         canvas.drawColor(Color.BLACK);
         canvas.clipPath(mCutterClipPath);
         canvas.drawColor(Color.RED);
+
         //绘制图片
         Matrix bmpMatrix = new Matrix();
         //重点:因为传入的top值是外接矩形在控件中的位置，因此必须先减去里面包含的控件的高度相关的数量，否则位置会有所偏差
-        bmpMatrix.setTranslate((int) (-left * (1f / mScale)),
-                -(top - (mHeight / 2f - mBitmap.getHeight() / 2f * mScale)) * (1f / mScale));
+        bmpMatrix.setTranslate((int) (left * (1f / mScale)),  (top * (1f / mScale))); //抵消 step0的影响·
         canvas.drawBitmap(mBitmap, bmpMatrix, null);
+
         return bitmap;
     }
 }
