@@ -19,7 +19,7 @@ public class CutterActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cutter_example);
         PhotoCutter photoCutter = findViewById(R.id.pc_cutter);
-        photoCutter.setBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.tree));
+        photoCutter.setBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test_pic_2));
         findViewById(R.id.btn_photo_cutter_rotate).setOnClickListener(v -> {
             photoCutter.rotate(mRotate);
             mRotate += 90;

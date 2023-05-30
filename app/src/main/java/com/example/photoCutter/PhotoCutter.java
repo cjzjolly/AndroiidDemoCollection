@@ -449,20 +449,17 @@ public class PhotoCutter extends View {
         float right = Math.max(mVectorPoint[1].x, mVectorPoint[2].x);
         float bottom = Math.max(mVectorPoint[2].y, mVectorPoint[3].y);
         Rect rect = new Rect((int) left, (int) top, (int) right, (int) bottom);
-        Bitmap bitmap = Bitmap.createBitmap((int) ((float) rect.width() * (1f / mScale)), (int) ((float) rect.height() * (1f / mScale)), Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap((int) ((float) rect.width() * (1f / mScale)), (int) ((float) rect.height() * (1f / mScale)), Bitmap.Config.ARGB_8888);  //大小不定， 只看外接矩形的大小
         Canvas canvas = new Canvas(bitmap);
 
-        Matrix pathMatrix = new Matrix();
-        pathMatrix.setTranslate(-offsetX, -offsetY); //todo bug 这里会导致图片没有了边框移动后的左、上边距
-        pathMatrix.postScale(bitmap.getWidth() / (float) rect.width(), bitmap.getHeight() / (float) rect.height());
-        mCutterClipPath.transform(pathMatrix);
-        canvas.drawColor(Color.BLACK);
-        canvas.clipPath(mCutterClipPath);
-        canvas.drawColor(Color.RED);
+//        Matrix pathMatrix = new Matrix();
+//        pathMatrix.postScale(1f / mScale, 1f / mScale);
+//        mCutterClipPath.transform(pathMatrix);
+//        canvas.clipPath(mCutterClipPath); //bug
 
-        //绘制图片
-        Matrix bmpMatrix = new Matrix();
-//        bmpMatrix.setTranslate(offsetX - left , offsetY - top);
+
+        Matrix bmpMatrix = new Matrix(); //没啥bug了
+        bmpMatrix.setTranslate(-(left - offsetX) / mScale, -(top - offsetY) / mScale);
         canvas.drawBitmap(mBitmap, bmpMatrix, null);
 
         return bitmap;
