@@ -19,8 +19,6 @@ import android.view.View;
 
 import androidx.annotation.Nullable;
 
-import com.example.piccut.R;
-
 /**图片裁剪框
  * @author chenjiezhu
  * **/
@@ -413,34 +411,7 @@ public class PhotoCutter extends View {
             Log.e(TAG, "当前没有用户裁剪path");
             return null;
         }
-//        //算出裁剪框的裁剪范围的外接矩形:
-//        float offsetX = ((mWidth - mBitmap.getWidth() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
-//        float offsetY = ((mHeight - mBitmap.getHeight() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
-//        float left = Math.min(mVectorPoint[0].x - offsetX, mVectorPoint[3].x - offsetX);
-//        float top = Math.min(mVectorPoint[0].y - offsetY, mVectorPoint[1].y - offsetY);
-//        float right = Math.max(mVectorPoint[1].x - offsetX, mVectorPoint[2].x - offsetX);
-//        float bottom = Math.max(mVectorPoint[2].y - offsetY, mVectorPoint[3].y - offsetY);
-//        Rect rect = new Rect((int) left, (int) top, (int) right, (int) bottom);
-//        Bitmap bitmap = Bitmap.createBitmap((int) (rect.width() * (1f / mScale)), (int) (rect.height() * (1f / mScale)), Bitmap.Config.ARGB_8888);
-//        Canvas canvas = new Canvas(bitmap);
-////        canvas.translate((int) (-left * (1f / mScale)), (int) (-top * (1f / mScale))); //抵消位移
-//        //画布挖洞
-//        Matrix pathMatrix = new Matrix();
-////        pathMatrix.setTranslate(-left, -top); //以画布为静止参考系，那么反向数值移动即可抵消位移
-//        pathMatrix.postScale(1f / mScale, 1f / mScale);
-//        mCutterClipPath.transform(pathMatrix); //todo 小心资源冲突
-//        canvas.drawColor(Color.BLACK);
-//        canvas.clipPath(mCutterClipPath);
-//        canvas.drawColor(Color.RED);
-//        //绘制图片
-//        Matrix bmpMatrix = new Matrix();
-//        //重点:因为传入的top值是外接矩形在控件中的位置，因此必须先减去里面包含的控件的高度相关的数量，否则位置会有所偏差
-//        bmpMatrix.setTranslate((int) (-left * (1f / mScale)),
-//                -(top - (mHeight / 2f - mBitmap.getHeight() / 2f * mScale)) * (1f / mScale));
-////        canvas.drawBitmap(mBitmap, bmpMatrix, null);
-//        return bitmap;
-//        //todo 有bug，照片出不来
-
+        //算出裁剪框的裁剪范围的外接矩形:
         float offsetX = ((mWidth - mBitmap.getWidth() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
         float offsetY = ((mHeight - mBitmap.getHeight() * mScale) / 2f); //去除计算中纳入的控件黑边，以防图像在控件缩放后两边有黑边时，导致裁剪时把偏移量多算了控件上的黑边范围导致严重误差
 
@@ -451,15 +422,18 @@ public class PhotoCutter extends View {
         Rect rect = new Rect((int) left, (int) top, (int) right, (int) bottom);
         Bitmap bitmap = Bitmap.createBitmap((int) ((float) rect.width() * (1f / mScale)), (int) ((float) rect.height() * (1f / mScale)), Bitmap.Config.ARGB_8888);  //大小不定， 只看外接矩形的大小
         Canvas canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.BLACK);
 
-//        Matrix pathMatrix = new Matrix();
-//        pathMatrix.postScale(1f / mScale, 1f / mScale);
-//        mCutterClipPath.transform(pathMatrix);
-//        canvas.clipPath(mCutterClipPath); //bug
-
+        //将裁剪范围应用于画布
+        Matrix pathMatrix = new Matrix();
+        pathMatrix.postTranslate(-rect.left, -rect.top); //因为left和top是应用于view的canvas之上的，还要转换为当前bmp画布的坐标，抹去view的canvas留下的间隙偏移量
+        pathMatrix.postScale(1f / mScale, 1f / mScale);
+        mCutterClipPath.transform(pathMatrix);
+        canvas.clipPath(mCutterClipPath);
+        //canvas.drawColor(Color.RED); //for debug
 
         Matrix bmpMatrix = new Matrix(); //没啥bug了
-        bmpMatrix.setTranslate(-(left - offsetX) / mScale, -(top - offsetY) / mScale);
+        bmpMatrix.setTranslate(-(rect.left - offsetX) / mScale, -(rect.top - offsetY) / mScale);
         canvas.drawBitmap(mBitmap, bmpMatrix, null);
 
         return bitmap;
