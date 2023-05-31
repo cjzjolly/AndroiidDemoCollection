@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathMeasure;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -193,6 +194,7 @@ public class PhotoCutter extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        //canvas.drawColor(Color.GREEN); //for debug
         super.onDraw(canvas);
         //绘制图片:
         if (null != mBitmap && !mBitmap.isRecycled()) {
@@ -286,9 +288,27 @@ public class PhotoCutter extends View {
         resetView();
     }
 
-    /**todo 设置旋转量**/
+    /**设置旋转量**/
     public void rotate(int rotate) {
         setRotation(rotate); //整个控件进行旋转
+        if (null == mBitmap) {
+            return;
+        }
+        float ratioW = (float) mBitmap.getHeight() / mWidth;
+        float ratioH = (float) mBitmap.getWidth() / mHeight;
+        float scale = 1f;
+        if (ratioW < ratioH) {
+            scale = 1f / ratioW;
+        } else {
+            scale = 1f / ratioH;
+        }
+        if (getRotation() % 180 == 0) {
+            setScaleX(1f);
+            setScaleY(1f);
+        } else {
+            setScaleX(scale);
+            setScaleY(scale);
+        }
     }
 
     /**设置选择点**/
@@ -304,9 +324,6 @@ public class PhotoCutter extends View {
         mVectorPointByUserSet[1] = rightTop;
         mVectorPointByUserSet[2] = rightBottom;
         mVectorPointByUserSet[3] = leftBottom;
-        //Log.i("cjztest", String.format("左上:%f,%f, 右上:%f,%f, 左下:%f,%f, 右下:%f,%f", leftTop.x, leftTop.y, rightTop.x, rightTop.y,
-        //        leftBottom.x, leftBottom.y, rightBottom.x, rightBottom.y));
-        //Log.i("cjztest", String.format("图片宽高%d, %d", mBitmap.getWidth(), mBitmap.getHeight()));
         resetView();
     }
 
@@ -398,6 +415,21 @@ public class PhotoCutter extends View {
         invalidate();
     }
 
+    /**对向量继续进行旋转**/
+    private float[] rotate2d(float vec[], double angle) throws Exception {
+        if (null == vec) {
+            return null;
+        }
+        if (vec.length > 2) {
+            throw new Exception("不接受超过2D的坐标");
+        }
+        double angleRad = Math.toRadians(angle);
+        float rotatedVec[] = new float[2];
+        rotatedVec[0] = (float) (Math.cos(angleRad) * vec[0] - Math.sin(angleRad) * vec[1]);
+        rotatedVec[1] = (float) (Math.sin(angleRad) * vec[0] + Math.cos(angleRad) * vec[1]);
+        return rotatedVec;
+    }
+
     public Bitmap cutPhoto() {
         if (null == mBitmap || mBitmap.isRecycled()) {
             Log.e(TAG, "当前没有图片");
@@ -425,11 +457,12 @@ public class PhotoCutter extends View {
         canvas.drawColor(Color.BLACK);
 
         //将裁剪范围应用于画布
+        Path cutterPathClone = new Path(mCutterClipPath);
         Matrix pathMatrix = new Matrix();
         pathMatrix.postTranslate(-rect.left, -rect.top); //因为left和top是应用于view的canvas之上的，还要转换为当前bmp画布的坐标，抹去view的canvas留下的间隙偏移量
         pathMatrix.postScale(1f / mScale, 1f / mScale);
-        mCutterClipPath.transform(pathMatrix);
-        canvas.clipPath(mCutterClipPath);
+        cutterPathClone.transform(pathMatrix);
+        canvas.clipPath(cutterPathClone);
         //canvas.drawColor(Color.RED); //for debug
 
         Matrix bmpMatrix = new Matrix(); //没啥bug了
