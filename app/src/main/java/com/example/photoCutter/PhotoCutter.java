@@ -274,6 +274,7 @@ public class PhotoCutter extends View {
     }
 
     private void init() {
+        setLayerType(LAYER_TYPE_SOFTWARE, null); //防止部分设备出现显示bug，禁止硬件加速
         areaWidth = (int) MeasurelUtils.convertDpToPixel(100, getContext());
         resetView();
     }
@@ -309,6 +310,7 @@ public class PhotoCutter extends View {
             setScaleX(scale);
             setScaleY(scale);
         }
+        invalidate();
     }
 
     /**设置选择点**/
