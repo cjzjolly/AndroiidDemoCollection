@@ -290,7 +290,10 @@ public class PhotoCutter extends View {
     }
 
     /**设置旋转量**/
-    public void rotate(int rotate) {
+    public void rotate(int rotate) throws Exception {
+        if (rotate % 90 != 0) {
+            throw new Exception("不允许使用非90度倍率的旋转角度");
+        }
         setRotation(rotate); //整个控件进行旋转
         if (null == mBitmap) {
             return;
@@ -456,7 +459,7 @@ public class PhotoCutter extends View {
         Rect rect = new Rect((int) left, (int) top, (int) right, (int) bottom);
         Bitmap bitmap = Bitmap.createBitmap((int) ((float) rect.width() * (1f / mScale)), (int) ((float) rect.height() * (1f / mScale)), Bitmap.Config.ARGB_8888);  //大小不定， 只看外接矩形的大小
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawColor(Color.BLACK);
+        canvas.drawColor(Color.TRANSPARENT);
 
         //将裁剪范围应用于画布
         Path cutterPathClone = new Path(mCutterClipPath);

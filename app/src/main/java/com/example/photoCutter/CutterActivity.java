@@ -21,7 +21,11 @@ public class CutterActivity extends Activity {
         PhotoCutter photoCutter = findViewById(R.id.pc_cutter);
         photoCutter.setBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.test_pic_2));
         findViewById(R.id.btn_photo_cutter_rotate).setOnClickListener(v -> {
-            photoCutter.rotate(mRotate);
+            try {
+                photoCutter.rotate(mRotate);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             mRotate += 90;
         });
         findViewById(R.id.btn_photo_cutter_cut).setOnClickListener(v -> {
