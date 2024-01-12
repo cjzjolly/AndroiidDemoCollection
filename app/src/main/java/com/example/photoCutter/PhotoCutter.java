@@ -2,13 +2,11 @@ package com.example.photoCutter;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PathMeasure;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -48,6 +46,8 @@ public class PhotoCutter extends View {
     private Path mCutterClipPath = null;
     /**当前触摸事件**/
     private int mCurrentAction = MotionEvent.ACTION_UP;
+    /**让控件绘制时向中心收拢缩放一下，避免边缘显示不出来**/
+    private float mScaleForBorder = 0.9f;
 
     public PhotoCutter(Context context) {
         super(context);
@@ -118,6 +118,12 @@ public class PhotoCutter extends View {
         /**1、ACTION_DOWN：判断是否和端点的外接矩形相交
          * 2、ACTION_MOVE：端点值加上偏移值
          * **/
+        if (mWidth == 0 || mHeight == 0) {
+            return true;
+        }
+        float tp[] = new float[] {event.getX(), event.getY()};
+        float x = tp[0];
+        float y = tp[1];
         mCurrentAction = event.getAction();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -126,18 +132,18 @@ public class PhotoCutter extends View {
                 }
                 for (int i = 0; i < mTouchArea.length; i++) {
                     RectF area = mTouchArea[i];
-                    if (area.contains(event.getX(), event.getY())) {
+                    if (area.contains(x, y)) {
                         //在up之前都绑定这个area和端点
                         mSelectedPoint = i;
-                        mPrevTouchPos = new PointF(event.getX(), event.getY());
+                        mPrevTouchPos = new PointF(x, y);
                         break;
                     }
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (null != mPrevTouchPos && mSelectedPoint != -1) {
-                    float dx = event.getX() - mPrevTouchPos.x;
-                    float dy = event.getY() - mPrevTouchPos.y;
+                    float dx = x - mPrevTouchPos.x;
+                    float dy = y - mPrevTouchPos.y;
                     //禁止超出图片范围：
                     RectF limitedArea = new RectF(mWidth / 2 - mBitmap.getWidth() / 2 * mScale,
                             mHeight / 2 - mBitmap.getHeight() / 2 * mScale,
@@ -181,7 +187,7 @@ public class PhotoCutter extends View {
                     mVectorPoint[mSelectedPoint].offset(dx, dy);
                     invalidate();
                 }
-                mPrevTouchPos = new PointF(event.getX(), event.getY());
+                mPrevTouchPos = new PointF(x, y);
                 break;
             case MotionEvent.ACTION_UP:
                 mSelectedPoint = -1;
@@ -196,6 +202,7 @@ public class PhotoCutter extends View {
     protected void onDraw(Canvas canvas) {
         //canvas.drawColor(Color.GREEN); //for debug
         super.onDraw(canvas);
+        canvas.scale(mScaleForBorder, mScaleForBorder, mWidth / 2f, mHeight / 2f);
         //绘制图片:
         if (null != mBitmap && !mBitmap.isRecycled()) {
             //移动到图片到控件中间并贴图
@@ -334,6 +341,9 @@ public class PhotoCutter extends View {
 
     /**初始化**/
     private void resetView() {
+        if (mWidth == 0 || mHeight == 0) {
+            return;
+        }
         //根据照片大小覆盖在画布上
         if (null != mBitmap && !mBitmap.isRecycled()) {
             int bmpW = mBitmap.getWidth();
