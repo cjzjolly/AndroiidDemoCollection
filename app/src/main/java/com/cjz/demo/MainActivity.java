@@ -97,11 +97,18 @@ public class MainActivity extends Activity {
         linearLayoutContainer.addView(sidingMenuBtn);
         //可以放大缩放的白板：
         Button whiteboardBtn = new Button(this);
-        whiteboardBtn.setText("可以放大缩放的白板");
+        whiteboardBtn.setText("使用bitmap图块实现的白板");
         whiteboardBtn.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, com.example.whiteboard.MainActivity.class));
         });
         linearLayoutContainer.addView(whiteboardBtn);
+        //纯canvas实现的白板：
+        Button whiteboardPureCanvasBtn = new Button(this);
+        whiteboardPureCanvasBtn.setText("纯canvas实现的的白板");
+        whiteboardPureCanvasBtn.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, com.example.whiteboardPureCanvas.MainActivity.class));
+        });
+        linearLayoutContainer.addView(whiteboardPureCanvasBtn);
         //最旧条目去除算法测试：
         Button eldestOutTest = new Button(this);
         eldestOutTest.setText("最旧条目去除算法测试");
