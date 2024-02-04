@@ -1,18 +1,19 @@
 package com.example.whiteboardPureCanvas
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
+import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import androidx.annotation.RequiresApi
 import com.example.whiteboard.BaseCurv
 import com.example.whiteboard.Curv
 import com.example.whiteboard.CurvEraser
 import com.example.whiteboard.CurvPenMode
+import java.util.*
+import kotlin.collections.HashMap
 
 /**1、移动和缩放时缩放是针对画布而不是越来越多的path，使得计算量保持一定
  * 2、通过反向缩放、反向移动实现绘制的在图片上时不会出现绘制中的path偏移
@@ -48,7 +49,7 @@ class WhiteboardView @JvmOverloads constructor(
     }
 
     /**当前选择的绘制模式 */
-    private val mCurrentFunChoice = FuntionKind.DRAW
+    private var mCurrentFunChoice = FuntionKind.DRAW
 
     /**当前选择的画笔模式 */
     private val mCurrentDrawKind = DrawKind.NORMAL
@@ -61,15 +62,23 @@ class WhiteboardView @JvmOverloads constructor(
 
     /**是否绘制触摸 */
     private val isShowTouchEvent = true
-    
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        when (mCurrentFunChoice) {
-            FuntionKind.DRAW -> {
-                event?.let { penDraw(it) }
-                invalidate()
-            }
-            FuntionKind.MOVE_AND_SCALE -> {
 
+    private val mPathList = LinkedList<BaseCurv>()
+
+    fun setMode(mode : FuntionKind) {
+        mCurrentFunChoice = mode
+    }
+    
+    @RequiresApi(Build.VERSION_CODES.O)
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event?.let {
+            when (mCurrentFunChoice) {
+                FuntionKind.DRAW -> {
+                    penDraw(it)
+                }
+                FuntionKind.MOVE_AND_SCALE -> {
+                    translate(it)
+                }
             }
         }
         invalidate()
@@ -111,6 +120,7 @@ class WhiteboardView @JvmOverloads constructor(
                     it.draw(event.getX(event.actionIndex), event.getY(event.actionIndex), event.action, mCanvas)
                     currentDrawingMap.put(id, it)
                 }
+                mCurrentCurv?.let {  mPathList.add(it) }
             }
             MotionEvent.ACTION_DOWN -> {
                 val id = event.getPointerId(event.actionIndex)
@@ -146,10 +156,24 @@ class WhiteboardView @JvmOverloads constructor(
         }
     }
 
-    override fun onDraw(canvas: Canvas?) {
-        if (mCurrentFunChoice != FuntionKind.DRAW) {
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun translate(event: MotionEvent) {
+        //todo 使用同一张图片移动迭代，例如将当前bmp内容左移一点后再写到bmp中
+        if (mCanvasBitmap == null) {
             return
         }
+        val canvas = Canvas(mCanvasBitmap!!)
+        val paint = Paint()
+        paint.blendMode = BlendMode.SRC
+        canvas.run {
+            drawBitmap(mCanvasBitmap!!, -3f, 0f, paint)
+            clipOutRect(3f, 0f, width.toFloat() - 3, height.toFloat())
+//            drawColor(Color.RED, PorterDuff.Mode.SRC) //for debug
+            drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+        }
+    }
+
+    override fun onDraw(canvas: Canvas?) {
         mCanvasBitmap?.let {bmp ->
             canvas?.drawBitmap(bmp, 0f, 0f, null)
         }
