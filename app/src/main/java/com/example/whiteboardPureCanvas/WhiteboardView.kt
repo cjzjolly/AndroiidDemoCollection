@@ -32,7 +32,6 @@ class WhiteboardView @JvmOverloads constructor(
 
     /**当前绘制画布 */
     private var mCanvasBitmap: Bitmap? = null
-    private var mCanvasBitmapSwitch: Bitmap? = null
 
     /**当前绘制画布 */
     private var mCanvas: Canvas? = null
@@ -67,8 +66,6 @@ class WhiteboardView @JvmOverloads constructor(
     private val mPathList = LinkedList<BaseCurv>()
 
     private val mPrevTouch = PointF()
-
-    private var mBufferBmpSwitch = true
 
     fun setMode(mode : FuntionKind) {
         mCurrentFunChoice = mode
@@ -175,12 +172,8 @@ class WhiteboardView @JvmOverloads constructor(
         if (!mCanvasBitmap!!.isMutable || mCanvasBitmap!!.isRecycled) {
             return
         }
-        //两个bmp彼此互相迭代内容
-        val canvas = if (mBufferBmpSwitch) {
-            Canvas(mCanvasBitmapSwitch!!)
-        } else {
-            Canvas(mCanvasBitmap!!)
-        }
+
+        val canvas = Canvas(mCanvasBitmap!!)
         //设置完全覆盖模式的绘制方式，否则不会清屏
         val paint = Paint()
         paint.blendMode = BlendMode.SRC
@@ -188,19 +181,16 @@ class WhiteboardView @JvmOverloads constructor(
         val dy = event.y - mPrevTouch.y
         Log.e("cjztest", "dx:$dx, dy:$dy")
         canvas.run {
-            val contentBmp = if (mBufferBmpSwitch) {
-                mCanvasBitmap!!
-            } else {
-                mCanvasBitmapSwitch!!
-            }
+            val contentBmp = mCanvasBitmap!!.copy(mCanvasBitmap!!.config, true)
             drawBitmap(contentBmp, dx, dy, paint)
+            contentBmp.recycle()
 
 //            clipOutRect(3f, 0f, width.toFloat() - 3, height.toFloat())
 //            drawColor(Color.RED, PorterDuff.Mode.SRC) //for debug
 //            drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
         }
         mPrevTouch.set(event.x, event.y)
-        mBufferBmpSwitch = !mBufferBmpSwitch
+
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -237,7 +227,6 @@ class WhiteboardView @JvmOverloads constructor(
             mWidth = width
             mHeight = height
             mCanvasBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888)
-            mCanvasBitmapSwitch = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888)
             mCanvasBitmap?.let {
                 mCanvas = Canvas(it)
             }
