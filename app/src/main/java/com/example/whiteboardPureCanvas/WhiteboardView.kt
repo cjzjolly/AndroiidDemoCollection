@@ -65,11 +65,13 @@ class WhiteboardView @JvmOverloads constructor(
 
     private val mPathList = LinkedList<BaseCurv>()
 
+    private val mPrevTouch = PointF()
+
     fun setMode(mode : FuntionKind) {
         mCurrentFunChoice = mode
     }
     
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         event?.let {
             when (mCurrentFunChoice) {
@@ -162,15 +164,33 @@ class WhiteboardView @JvmOverloads constructor(
         if (mCanvasBitmap == null) {
             return
         }
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                mPrevTouch.set(event.x, event.y)
+            }
+        }
+        if (!mCanvasBitmap!!.isMutable || mCanvasBitmap!!.isRecycled) {
+            return
+        }
+
         val canvas = Canvas(mCanvasBitmap!!)
+        //设置完全覆盖模式的绘制方式，否则不会清屏
         val paint = Paint()
         paint.blendMode = BlendMode.SRC
+        val dx = event.x - mPrevTouch.x
+        val dy = event.y - mPrevTouch.y
+        Log.e("cjztest", "dx:$dx, dy:$dy")
         canvas.run {
-            drawBitmap(mCanvasBitmap!!, -3f, 0f, paint)
-            clipOutRect(3f, 0f, width.toFloat() - 3, height.toFloat())
+            val contentBmp = mCanvasBitmap!!.copy(mCanvasBitmap!!.config, true)
+            drawBitmap(contentBmp, dx, dy, paint)
+            contentBmp.recycle()
+
+//            clipOutRect(3f, 0f, width.toFloat() - 3, height.toFloat())
 //            drawColor(Color.RED, PorterDuff.Mode.SRC) //for debug
-            drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
+//            drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
         }
+        mPrevTouch.set(event.x, event.y)
+
     }
 
     override fun onDraw(canvas: Canvas?) {
