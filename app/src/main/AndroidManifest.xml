@@ -43,7 +43,7 @@
         </activity>
         <activity android:name="com.example.singleChoiceRecyclerView.SingleOrMultiChoiceRecyclerActivity">
         </activity>
-        <activity android:name="com.cjz.demo.MainActivity">
+        <activity android:name="com.example.whiteboard.MainActivity2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
