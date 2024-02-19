@@ -44,12 +44,16 @@ public class MainActivity2 extends Activity {
         Canvas canvas = new Canvas(bitmap);
         ImageView iv = new ImageView(this);
         Path basePath = new Path();
-//        basePath.moveTo(50, 50);
+
 //        basePath.addRoundRect(50, 50, 500, 500, 20, 20, Path.Direction.CCW);
-        basePath.addOval(30, 30, 300, 300, Path.Direction.CCW);
+//        basePath.addOval(30, 30, 300, 300, Path.Direction.CCW);
+        basePath.moveTo(50, 50);
+        basePath.lineTo(500, 500);
         PathMeasure pathMeasure = new PathMeasure(basePath, false);
         float lineWidth = 52f;
+        Path totalPath = new Path();
         Path outsiderPath = new Path();
+        Path innerPath = new Path();
         List<float[]> outsiderList = new LinkedList<>();
         for (float i = 0; i < pathMeasure.getLength(); i++) {
             float[] pos = new float[2];
@@ -58,37 +62,45 @@ public class MainActivity2 extends Activity {
             //计算方位角
             float degrees = (float) (Math.atan2(tan[1], tan[0]) * 180.0 / Math.PI);
             Log.i("cjztest", "degree:" + degrees);
-            float width = lineWidth * 1f; //todo
+            float width = lineWidth * 1f; //todo 根据书写压力更改width
             float newVec[] = new float[4];
-            float rotatedVec0[] = new float[] {-width / 2f, 0};
-            float rotatedVec1[] = new float[] {width / 2f, 0};
+            float rotatedVec[] = new float[] {-width / 2f, 0, width / 2f, 0};
 
             Matrix matrix = new Matrix();
             matrix.setRotate(degrees + 90);
-            matrix.mapPoints(rotatedVec0);
-            matrix.mapPoints(rotatedVec1);
+            matrix.mapPoints(rotatedVec);
             //偏移到对应位置
-            newVec[0] = rotatedVec0[0] + pos[0];
-            newVec[1] = rotatedVec0[1] + pos[1];
-            newVec[2] = rotatedVec1[0] + pos[0];
-            newVec[3] = rotatedVec1[1] + pos[1];
+            newVec[0] = rotatedVec[0] + pos[0];
+            newVec[1] = rotatedVec[1] + pos[1];
+            newVec[2] = rotatedVec[2] + pos[0];
+            newVec[3] = rotatedVec[3] + pos[1];
             outsiderList.add(newVec);
         }
+        //勾勒外边框
         for (int i = 0; i < outsiderList.size(); i++) {
             float[] pos = outsiderList.get(i);
             if (i == 0) {
-                outsiderPath.moveTo(pos[0], pos[1]);
+                outsiderPath.moveTo(pos[2], pos[3]);
+                outsiderPath.lineTo(pos[0], pos[1]);
             } else if (i % 2 == 0) {
                 outsiderPath.lineTo(pos[0], pos[1]);
             }
         }
+        //勾勒内边框
         for (int i = 0; i < outsiderList.size(); i++) {
             float[] pos = outsiderList.get(i);
-            if (i % 2 != 0) {
-                outsiderPath.lineTo(pos[2], pos[3]);
+            if (i == 0) {
+                innerPath.moveTo(pos[2], pos[3]);
+            } else if (i % 2 != 0) {
+                innerPath.lineTo(pos[2], pos[3]);
             }
         }
-        outsiderPath.setFillType(Path.FillType.EVEN_ODD);
+        float lastPoint[] = outsiderList.get(outsiderList.size() - 1);
+        innerPath.lineTo(lastPoint[0], lastPoint[1]);
+
+        totalPath.addPath(outsiderPath);
+        totalPath.addPath(innerPath);
+        totalPath.setFillType(Path.FillType.EVEN_ODD);
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
 //        paint.setStyle(Paint.Style.STROKE);
@@ -96,8 +108,12 @@ public class MainActivity2 extends Activity {
         paint.setColor(Color.RED);
 
         canvas.drawColor(Color.GRAY);
+        canvas.drawPath(totalPath, paint);
 
-        canvas.drawPath(outsiderPath, paint);
+        paint.setColor(Color.GREEN);
+        paint.setStyle(Paint.Style.STROKE);
+        canvas.drawPath(basePath, paint);
+
 
         iv.setImageBitmap(bitmap);
         setContentView(iv);
