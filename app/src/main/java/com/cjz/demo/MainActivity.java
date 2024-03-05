@@ -122,5 +122,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, SingleOrMultiChoiceRecyclerActivity.class));
         });
         linearLayoutContainer.addView(btnSingleChoiceRV);
+        //自定义swipeLayout
+        Button btnSwipeLayout = new Button(this);
+        btnSwipeLayout.setText("自定义swipeLayout view");
+        btnSwipeLayout.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, com.example.swipeLayoutDemo.MainActivity.class));
+        });
+        linearLayoutContainer.addView(btnSwipeLayout);
     }
 }

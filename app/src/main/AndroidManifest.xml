@@ -43,6 +43,8 @@
         </activity>
         <activity android:name="com.example.singleChoiceRecyclerView.SingleOrMultiChoiceRecyclerActivity">
         </activity>
+        <activity android:name="com.example.swipeLayoutDemo.MainActivity">
+        </activity>
         <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
