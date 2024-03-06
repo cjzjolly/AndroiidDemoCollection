@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.Toast
 import com.example.piccut.R
 
 class MainActivity : Activity() {
@@ -20,5 +22,9 @@ class MainActivity : Activity() {
         v.layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300)
         v.setBackgroundColor(Color.RED)
         mSr?.setTipsView(v)
+
+        findViewById<Button>(R.id.btn_test).setOnClickListener {
+            Toast.makeText(this, "asdasdasd", Toast.LENGTH_SHORT).show()
+        }
     }
 }

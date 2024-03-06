@@ -37,6 +37,8 @@ class SwipeRefreshLayout @JvmOverloads constructor(
         view.visibility = INVISIBLE
     }
 
+
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         Log.e("cjztest", "MotionEvent:${event}")
         when (event?.action) {
@@ -89,6 +91,10 @@ class SwipeRefreshLayout @JvmOverloads constructor(
             }
         }
         mPrevY = event?.rawY!!
+        return true
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
         return true
     }
 

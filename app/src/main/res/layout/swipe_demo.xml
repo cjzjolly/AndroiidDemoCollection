@@ -10,10 +10,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
+        <Button
+            android:id="@+id/btn_test"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#FFFF00"/>
+            android:background="#FFFF00"
+            android:text="asdasd"/>
 
     </com.example.swipeLayoutDemo.SwipeRefreshLayout>
 
