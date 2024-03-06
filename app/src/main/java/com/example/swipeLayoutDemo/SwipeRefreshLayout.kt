@@ -3,6 +3,7 @@ package com.example.swipeLayoutDemo
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -24,7 +25,6 @@ class SwipeRefreshLayout @JvmOverloads constructor(
     private var mAnimator: ValueAnimator? = null
     private val OND_DP = MeasurelUtils.convertDpToPixel(1f, context)
     private var mPrevY = 0f
-    private var mMaxOffsetY = 100 * OND_DP
     private var mSwipeCallBack: SwipeCallBack? = null
     /**下拉提示**/
     private var mTipsView: View? = null
@@ -40,12 +40,13 @@ class SwipeRefreshLayout @JvmOverloads constructor(
 
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        Log.e("cjztest", "MotionEvent:${event}")
+        var result = false
         when (event?.action) {
             MotionEvent.ACTION_MOVE -> {
                 mTipsView?.visibility = VISIBLE
                 val deltaY = event?.rawY - mPrevY
                 setViewYAxis(deltaY)
+                result = true
             }
             //使用动画回弹
             MotionEvent.ACTION_UP -> {
@@ -58,7 +59,6 @@ class SwipeRefreshLayout @JvmOverloads constructor(
                         val deltaY = currentY - prevVal
                         setViewYAxis(deltaY)
                         prevVal = currentY
-                        Log.e("cjztest", "CurrentY:${currentY}")
                     }
                     addListener(object : Animator.AnimatorListener {
                         override fun onAnimationStart(animation: Animator?) {
@@ -91,11 +91,13 @@ class SwipeRefreshLayout @JvmOverloads constructor(
             }
         }
         mPrevY = event?.rawY!!
-        return true
+        Log.e("cjztest", "test1")
+        return result
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        return true
+        //如果容器处于移动状态，就拦截所有触摸事件，不分发到子控件了
+        return onTouchEvent(ev)
     }
 
     private fun callRefresh() {
