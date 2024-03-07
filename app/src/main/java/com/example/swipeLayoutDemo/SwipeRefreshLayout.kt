@@ -32,6 +32,7 @@ class SwipeRefreshLayout @JvmOverloads constructor(
     private var mTipsView: View? = null
     private var mOffsetY = 0f
     private val childYList = HashMap<View, Float>()
+    private var mPreDispatchDownY = 0f
 
     fun setTipsView(view: View) {
         mTipsView = view
@@ -101,45 +102,21 @@ class SwipeRefreshLayout @JvmOverloads constructor(
             }
         }
         mPrevY = event?.rawY!!
-        Log.e("cjztest", "test1")
         return result
     }
 
-//    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-//        //如果容器处于移动状态，就拦截所有触摸事件，不分发到子控件了
-//        val child = getChildAt(1) as ViewGroup
-//        if (child.scrollY == 0) {
-//            return true
-//        }
-//        return false
-//    }
-
-//    override fun onTouchEvent(event: MotionEvent?): Boolean {
-//        val result =  super.onTouchEvent(event)
-//        Log.e("cjztest", "onTouchEvent:$result")
-//        return result
-//    }
-
-
-    var mPreDispatchDownY = 0f
-    var intercepter = false
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-//        touch(ev)
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean { //由自定义逻辑接管事件分发
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             mPreDispatchDownY = ev?.rawY
         }
         val child = getChildAt(1) as ViewGroup
-        //todo 下拉那里判断好就万事大吉，判断子容器是否滚动到最前面的位置，而且不是向下滚
+        //判断子容器是否滚动到最前面的位置，而且不是向下滚
         val deltaY = ev?.rawY!! - mPreDispatchDownY
         if ((child.scrollY == 0) && deltaY > 0) {
-            intercepter = true
             touch(ev)
-            Log.e("cjztest000", "child.scrollY:${child.scrollY}, deltaY:$deltaY")
         } else {
             child.dispatchTouchEvent(ev)
-            Log.e("cjztest111", "child.scrollY:${child.scrollY}, deltaY:$deltaY")
         }
-
         return true
     }
 
