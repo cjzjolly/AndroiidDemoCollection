@@ -10,7 +10,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import com.example.photoCutter.MeasurelUtils
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -24,7 +23,6 @@ class SwipeRefreshLayout @JvmOverloads constructor(
     private var mWidth = 0
     private var mHeight = 0
     private var mAnimator: ValueAnimator? = null
-    private val OND_DP = MeasurelUtils.convertDpToPixel(1f, context)
     private var mPrevY = 0f
     private var mDownY = 0f
     private var mSwipeCallBack: SwipeCallBack? = null
@@ -40,19 +38,21 @@ class SwipeRefreshLayout @JvmOverloads constructor(
         view.visibility = INVISIBLE
     }
 
-
+    fun setSwipeCallBack(cb : SwipeCallBack) {
+        mSwipeCallBack = cb
+    }
 
     fun touch(event: MotionEvent?): Boolean {
         var result = false
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
-                mDownY = event?.rawY
+                mDownY = event?.rawY!!
                 mAnimator?.cancel()
             }
             MotionEvent.ACTION_MOVE -> {
-                if (event?.rawY - mDownY > 30) {
+                if (event?.rawY!! - mDownY > 30) {
                     mTipsView?.visibility = VISIBLE
-                    val deltaY = event?.rawY - mPrevY
+                    val deltaY = event?.rawY!! - mPrevY
                     setViewYAxis(deltaY)
                     result = true
                 } else {
@@ -61,58 +61,72 @@ class SwipeRefreshLayout @JvmOverloads constructor(
             }
             //使用动画回弹
             MotionEvent.ACTION_UP -> {
-                mAnimator?.cancel()
-                mAnimator = ValueAnimator.ofFloat(mOffsetY, 0f)
-                mAnimator?.run {
-                    var prevVal = mOffsetY
-                    addUpdateListener { animation ->
-                        val currentY = animation?.animatedValue as Float
-                        val deltaY = currentY - prevVal
-                        setViewYAxis(deltaY)
-                        prevVal = currentY
-                    }
-                    addListener(object : Animator.AnimatorListener {
-                        override fun onAnimationStart(animation: Animator?) {
-
-                        }
-
-                        override fun onAnimationEnd(animation: Animator?) {
-                            for (i in 0 until childCount) {
-                                val v = getChildAt(i)
-                                childYList[v]?.run {
-                                    v.y = this@run
-                                }
-                            }
-                            mTipsView?.visibility = INVISIBLE
-                        }
-
-                        override fun onAnimationCancel(animation: Animator?) {
-                            onAnimationEnd(animation)
-                        }
-
-                        override fun onAnimationRepeat(animation: Animator?) {
-
-                        }
-
-                    })
-                    duration = 300
-                    start()
-                    callRefresh()
-                }
+                startAnimateFadeUp()
+                callRefresh()
             }
         }
         mPrevY = event?.rawY!!
         return result
     }
 
+    private fun startAnimateFadeUp () {
+        mAnimator?.cancel()
+        mAnimator = ValueAnimator.ofFloat(mOffsetY, 0f)
+        mAnimator?.run {
+            var prevVal = mOffsetY
+            addUpdateListener { animation ->
+                val currentY = animation?.animatedValue as Float
+                val deltaY = currentY - prevVal
+                setViewYAxis(deltaY)
+                prevVal = currentY
+            }
+            addListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(p0: Animator) {
+
+                }
+
+                override fun onAnimationEnd(p0: Animator) {
+                    for (i in 0 until childCount) {
+                        val v = getChildAt(i)
+                        childYList[v]?.run {
+                            v.y = this@run
+                        }
+                    }
+                    mTipsView?.visibility = INVISIBLE
+                }
+
+                override fun onAnimationCancel(p0: Animator) {
+                    onAnimationEnd(p0)
+                }
+
+                override fun onAnimationRepeat(p0: Animator) {
+
+                }
+
+            })
+            duration = 300
+            start()
+            callRefresh()
+        }
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean { //由自定义逻辑接管事件分发
-        if (ev?.action == MotionEvent.ACTION_DOWN) {
-            mPreDispatchDownY = ev?.rawY
+        if (getChildAt(1) == null || getChildAt(1) !is ViewGroup) {
+            super.dispatchTouchEvent(ev)
         }
         val child = getChildAt(1) as ViewGroup
-        //判断子容器是否滚动到最前面的位置，而且不是向下滚
+        when (ev?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                mPreDispatchDownY = ev?.rawY!!
+                child.onTouchEvent(ev)
+            }
+            MotionEvent.ACTION_UP -> {
+                child.onTouchEvent(ev)
+            }
+        }
+        //判断子容器是否滚动到最前面的位置，而且不是向上滚
         val deltaY = ev?.rawY!! - mPreDispatchDownY
-        if ((child.scrollY == 0) && deltaY > 0) {
+        if (!child.canScrollVertically(-1) && deltaY > 0) {
             touch(ev)
         } else {
             child.dispatchTouchEvent(ev)
