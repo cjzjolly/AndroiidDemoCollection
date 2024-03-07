@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.example.photoCutter.MeasurelUtils
 import java.util.*
@@ -25,6 +26,7 @@ class SwipeRefreshLayout @JvmOverloads constructor(
     private var mAnimator: ValueAnimator? = null
     private val OND_DP = MeasurelUtils.convertDpToPixel(1f, context)
     private var mPrevY = 0f
+    private var mDownY = 0f
     private var mSwipeCallBack: SwipeCallBack? = null
     /**下拉提示**/
     private var mTipsView: View? = null
@@ -39,14 +41,22 @@ class SwipeRefreshLayout @JvmOverloads constructor(
 
 
 
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
+    fun touch(event: MotionEvent?): Boolean {
         var result = false
         when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                mDownY = event?.rawY
+                mAnimator?.cancel()
+            }
             MotionEvent.ACTION_MOVE -> {
-                mTipsView?.visibility = VISIBLE
-                val deltaY = event?.rawY - mPrevY
-                setViewYAxis(deltaY)
-                result = true
+                if (event?.rawY - mDownY > 30) {
+                    mTipsView?.visibility = VISIBLE
+                    val deltaY = event?.rawY - mPrevY
+                    setViewYAxis(deltaY)
+                    result = true
+                } else {
+                    result = false
+                }
             }
             //使用动画回弹
             MotionEvent.ACTION_UP -> {
@@ -95,9 +105,42 @@ class SwipeRefreshLayout @JvmOverloads constructor(
         return result
     }
 
-    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        //如果容器处于移动状态，就拦截所有触摸事件，不分发到子控件了
-        return onTouchEvent(ev)
+//    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+//        //如果容器处于移动状态，就拦截所有触摸事件，不分发到子控件了
+//        val child = getChildAt(1) as ViewGroup
+//        if (child.scrollY == 0) {
+//            return true
+//        }
+//        return false
+//    }
+
+//    override fun onTouchEvent(event: MotionEvent?): Boolean {
+//        val result =  super.onTouchEvent(event)
+//        Log.e("cjztest", "onTouchEvent:$result")
+//        return result
+//    }
+
+
+    var mPreDispatchDownY = 0f
+    var intercepter = false
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+//        touch(ev)
+        if (ev?.action == MotionEvent.ACTION_DOWN) {
+            mPreDispatchDownY = ev?.rawY
+        }
+        val child = getChildAt(1) as ViewGroup
+        //todo 下拉那里判断好就万事大吉，判断子容器是否滚动到最前面的位置，而且不是向下滚
+        val deltaY = ev?.rawY!! - mPreDispatchDownY
+        if ((child.scrollY == 0) && deltaY > 0) {
+            intercepter = true
+            touch(ev)
+            Log.e("cjztest000", "child.scrollY:${child.scrollY}, deltaY:$deltaY")
+        } else {
+            child.dispatchTouchEvent(ev)
+            Log.e("cjztest111", "child.scrollY:${child.scrollY}, deltaY:$deltaY")
+        }
+
+        return true
     }
 
     private fun callRefresh() {

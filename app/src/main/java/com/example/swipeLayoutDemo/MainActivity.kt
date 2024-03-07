@@ -20,7 +20,7 @@ class MainActivity : Activity() {
         mSr = findViewById(R.id.sr_test)
         val v = View(this)
         v.layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300)
-        v.setBackgroundColor(Color.RED)
+        v.setBackgroundColor(Color.GRAY)
         mSr?.setTipsView(v)
 
         findViewById<Button>(R.id.btn_test).setOnClickListener {
