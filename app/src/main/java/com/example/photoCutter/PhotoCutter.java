@@ -366,7 +366,7 @@ public class PhotoCutter extends View {
         mSelectorRectPointPaint.setStrokeWidth(6);
         mSelectorRectPointPaint.setColor(0xFF5588FF);
         if (null != mBitmap && !mBitmap.isRecycled()) {
-            //顺时政赋值一圈
+            //顺时针赋值一圈
             mVectorPoint[0] = new PointF(mWidth / 2 - mBitmap.getWidth() / 2 * mScale,
                     mHeight / 2 - mBitmap.getHeight() / 2 * mScale);
             mVectorPoint[1] = new PointF(mWidth / 2 + mBitmap.getWidth() / 2 * mScale,
@@ -497,15 +497,60 @@ public class PhotoCutter extends View {
         //使用mesh扭曲bitmap到想要的状态：
         Bitmap meshBitmap = Bitmap.createBitmap(bitmap);
         Canvas meshCanvas = new Canvas(meshBitmap);
-        meshCanvas.drawBitmapMesh(bitmap, rect.width(), rect.height()
-                , new float[] {
-                        (rect.left - offsetX) / mScale, (rect.top - offsetY) / mScale,
-                        (rect.right - offsetX) / mScale, (rect.top - offsetY) / mScale,
-                        (rect.left - offsetX) / mScale, (rect.bottom - offsetY) / mScale,
-                        (rect.right - offsetX) / mScale, (rect.bottom - offsetY) / mScale
-                }
-                , 0, null, 0, null);
+//        meshCanvas.drawBitmapMesh(bitmap, 2, 2  //(2 + 1) * (2 + 1) * 2
+//                ,new float[] {
+//
+//                        (-mVectorPoint[0].x - offsetX) / mScale, -(mVectorPoint[0].y - offsetY) / mScale,
+//                        (-(mVectorPoint[0].x + mVectorPoint[1].x) / 2 - offsetX) / mScale, -((mVectorPoint[0].y + mVectorPoint[1].y) / 2 - offsetY) / mScale,
+//                        (-mVectorPoint[1].x - offsetX) / mScale, -(mVectorPoint[1].y - offsetY) / mScale,
+//
+//                        -((mVectorPoint[0].x + mVectorPoint[3].x) / 2 - offsetX) / mScale, -((mVectorPoint[0].y + mVectorPoint[3].y) / 2 - offsetY) / mScale,
+//
+//                        -(((mVectorPoint[0].x + mVectorPoint[3].x) / 2 - offsetX) / mScale + ((mVectorPoint[1].x + mVectorPoint[2].x) / 2 - offsetX) / mScale) / 2,
+//                        -(((mVectorPoint[0].y + mVectorPoint[3].y) / 2 - offsetY) / mScale + ((mVectorPoint[1].y + mVectorPoint[2].y) / 2 - offsetY) / mScale) / 2,
+//
+//
+//                        -((mVectorPoint[1].x + mVectorPoint[2].x) / 2 - offsetX) / mScale, -((mVectorPoint[1].x + mVectorPoint[2].x) / 2 - offsetY) / mScale,
+//
+//                        (-mVectorPoint[3].x - offsetX) / mScale, -(mVectorPoint[3].y - offsetY) / mScale,
+//                        (-(mVectorPoint[3].x + mVectorPoint[2].x) / 2 - offsetX) / mScale, -((mVectorPoint[3].y + mVectorPoint[2].y) / 2 - offsetY) / mScale,
+//                        (-mVectorPoint[2].x - offsetX) / mScale, -(mVectorPoint[2].y - offsetY) / mScale,
+//
+//                }
+//                , 0, null, 0, mSelectorRectPointPaint);
+
+        meshCanvas.drawBitmapMesh(bitmap, 1, 1, new float[]
+                {
+                        (mVectorPoint[0].x - offsetX) / mScale, (mVectorPoint[0].y - offsetY) / mScale,
+                        (mVectorPoint[1].x - offsetX) / mScale, (mVectorPoint[1].y - offsetY) / mScale,
+
+                        (mVectorPoint[3].x - offsetX) / mScale, (mVectorPoint[3].y - offsetY) / mScale,
+                        (mVectorPoint[2].x - offsetX) / mScale, (mVectorPoint[2].y - offsetY) / mScale,
+                }, 0, new int[] {Color.RED, Color.RED, Color.RED, Color.RED, Color.RED, Color.RED, Color.RED, Color.RED}, 0, mSelectorRectPointPaint);
+
+
+//        int count = 10;
+//        //y = kx + b => kx => k = y / x;
+//        //k0斜率逐渐走到k1
+//        float k0 = ((mVectorPoint[1].y - mVectorPoint[0].y - offsetY) / mScale) / ((mVectorPoint[1].x - mVectorPoint[0].x - offsetX) / mScale);
+//        float k1 = ((mVectorPoint[2].y - mVectorPoint[3].y - offsetY) / mScale) / ((mVectorPoint[2].x - mVectorPoint[3].x - offsetX) / mScale);
+//        float points[] = new float[(count + 1) * (count + 1) * 2];
+//        float deltaX = (mVectorPoint[1].x - mVectorPoint[0].x - offsetX) / mScale / (float) count;
+//        float deltaY = (mVectorPoint[3].y - mVectorPoint[0].y - offsetY) / mScale / (float) count;
+//        for (int x = 0; x <= count; x ++) {
+//            for (int y = 0; y <= count; y ++) {
+//                int index = y * (count + 1) + x;
+//                if (index % 2 == 0) { // x = y / k
+//                    points[index] = index * 10;
+//                } else { //y
+//                    points[index] = index * 10;
+//                }
+//            }
+//        }
+//        meshCanvas.drawBitmapMesh(bitmap, count, count, points, 0, null, 0, mSelectorRectPointPaint);
 
         return meshBitmap;
     }
+
+
 }
