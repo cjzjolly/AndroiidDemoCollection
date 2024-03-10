@@ -3,14 +3,11 @@ package com.example.swipeLayoutDemo
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import java.util.*
 import kotlin.collections.HashMap
 
 class SwipeRefreshLayout @JvmOverloads constructor(
@@ -22,7 +19,8 @@ class SwipeRefreshLayout @JvmOverloads constructor(
 
     private var mWidth = 0
     private var mHeight = 0
-    private var mAnimator: ValueAnimator? = null
+    private var mAnimatorFadeUp: ValueAnimator? = null
+    private var mAnimatorFadeDown: ValueAnimator? = null
     private var mPrevY = 0f
     private var mDownY = 0f
     private var mSwipeCallBack: SwipeCallBack? = null
@@ -46,8 +44,8 @@ class SwipeRefreshLayout @JvmOverloads constructor(
         var result = false
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
+                resetAnimator()
                 mDownY = event?.rawY!!
-                mAnimator?.cancel()
             }
             MotionEvent.ACTION_MOVE -> {
                 if (event?.rawY!! - mDownY > 30) {
@@ -61,7 +59,13 @@ class SwipeRefreshLayout @JvmOverloads constructor(
             }
             //使用动画回弹
             MotionEvent.ACTION_UP -> {
-                startAnimateFadeUp()
+                if (mOffsetY > mTipsView?.height!! / 2) {
+                    resetAnimator()
+                    startAnimateFadeDown()
+                } else {
+                    resetAnimator()
+                    startAnimateFadeUp()
+                }
                 callRefresh()
             }
         }
@@ -69,10 +73,21 @@ class SwipeRefreshLayout @JvmOverloads constructor(
         return result
     }
 
+    public fun setRefreshing(isRefreshing : Boolean) {
+        if (!isRefreshing) {
+            startAnimateFadeUp()
+        }
+    }
+
+    private fun resetAnimator() {
+        mAnimatorFadeUp?.cancel()
+        mAnimatorFadeDown?.cancel()
+    }
+
     private fun startAnimateFadeUp () {
-        mAnimator?.cancel()
-        mAnimator = ValueAnimator.ofFloat(mOffsetY, 0f)
-        mAnimator?.run {
+        mAnimatorFadeUp?.cancel()
+        mAnimatorFadeUp = ValueAnimator.ofFloat(mOffsetY, 0f)
+        mAnimatorFadeUp?.run {
             var prevVal = mOffsetY
             addUpdateListener { animation ->
                 val currentY = animation?.animatedValue as Float
@@ -106,7 +121,46 @@ class SwipeRefreshLayout @JvmOverloads constructor(
             })
             duration = 300
             start()
-            callRefresh()
+        }
+    }
+
+    private fun startAnimateFadeDown () {
+        mAnimatorFadeDown?.cancel()
+        mAnimatorFadeDown = ValueAnimator.ofFloat(0f, mTipsView?.height!!.toFloat())
+        mAnimatorFadeDown?.run {
+            var prevVal = mOffsetY
+            addUpdateListener { animation ->
+                val currentY = animation?.animatedValue as Float
+                val deltaY = currentY - prevVal
+                setViewYAxis(deltaY)
+                prevVal = currentY
+            }
+            addListener(object : Animator.AnimatorListener {
+                override fun onAnimationStart(p0: Animator) {
+
+                }
+
+                override fun onAnimationEnd(p0: Animator) {
+                    for (i in 0 until childCount) {
+                        val v = getChildAt(i)
+                        childYList[v]?.run {
+                            v.y = this@run
+                        }
+                    }
+                    mTipsView?.visibility = INVISIBLE
+                }
+
+                override fun onAnimationCancel(p0: Animator) {
+                    onAnimationEnd(p0)
+                }
+
+                override fun onAnimationRepeat(p0: Animator) {
+
+                }
+
+            })
+            duration = 300
+            start()
         }
     }
 

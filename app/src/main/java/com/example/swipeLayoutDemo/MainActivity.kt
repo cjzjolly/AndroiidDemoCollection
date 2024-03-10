@@ -23,8 +23,9 @@ class MainActivity : Activity() {
         v.setBackgroundColor(Color.GRAY)
         mSr?.setTipsView(v)
 
-//        findViewById<Button>(R.id.btn_test).setOnClickListener {
-//            Toast.makeText(this, "asdasdasd", Toast.LENGTH_SHORT).show()
-//        }
+        findViewById<Button>(R.id.btn_test).setOnClickListener {
+            Toast.makeText(this, "asdasdasd", Toast.LENGTH_SHORT).show()
+            mSr?.setRefreshing(false)
+        }
     }
 }
