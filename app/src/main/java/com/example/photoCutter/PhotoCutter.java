@@ -486,7 +486,7 @@ public class PhotoCutter extends View {
         pathMatrix.postTranslate(-rect.left, -rect.top); //因为left和top是应用于view的canvas之上的，还要转换为当前bmp画布的坐标，抹去view的canvas留下的间隙偏移量
         pathMatrix.postScale(1f / mScale, 1f / mScale);
         cutterPathClone.transform(pathMatrix);
-        canvas.clipPath(cutterPathClone);
+//        canvas.clipPath(cutterPathClone);
         canvas.drawColor(Color.RED); //for debug
 
         Matrix bmpMatrix = new Matrix(); //没啥bug了
@@ -521,7 +521,7 @@ public class PhotoCutter extends View {
 
         meshCanvas.drawBitmapMesh(bitmap, 1, 1, new float[]
                 {
-                        (mVectorPoint[0].x - offsetX) / mScale, (mVectorPoint[0].y - offsetY) / mScale,
+                        -(mVectorPoint[0].x - offsetX) / mScale, -(mVectorPoint[0].y - offsetY) / mScale,
                         (mVectorPoint[1].x - offsetX) / mScale, (mVectorPoint[1].y - offsetY) / mScale,
 
                         (mVectorPoint[3].x - offsetX) / mScale, (mVectorPoint[3].y - offsetY) / mScale,
