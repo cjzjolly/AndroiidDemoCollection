@@ -471,19 +471,41 @@ public class PhotoCutter extends View {
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(Color.TRANSPARENT);
 
-        //将裁剪范围应用于画布
+
+        //todo 基本正确但要调整
+        float oppositeEdge = bottom - mVectorPoint[3].y;
+        float adjacentEdge = right - mVectorPoint[3].x;
+        double angle = Math.toDegrees(Math.atan(oppositeEdge / adjacentEdge));
+        Log.i("cjztest", "angle:" + angle);
+
+
+
+                //将裁剪范围应用于画布
         Path cutterPathClone = new Path(mCutterClipPath);
         Matrix pathMatrix = new Matrix();
         pathMatrix.postTranslate(-rect.left, -rect.top); //因为left和top是应用于view的canvas之上的，还要转换为当前bmp画布的坐标，抹去view的canvas留下的间隙偏移量
         pathMatrix.postScale(1f / mScale, 1f / mScale);
         cutterPathClone.transform(pathMatrix);
         canvas.clipPath(cutterPathClone);
-        //canvas.drawColor(Color.RED); //for debug
+        canvas.drawColor(Color.RED); //for debug
 
         Matrix bmpMatrix = new Matrix(); //没啥bug了
         bmpMatrix.setTranslate(-(rect.left - offsetX) / mScale, -(rect.top - offsetY) / mScale);
         canvas.drawBitmap(mBitmap, bmpMatrix, null);
 
-        return bitmap;
+
+        //使用mesh扭曲bitmap到想要的状态：
+        Bitmap meshBitmap = Bitmap.createBitmap(bitmap);
+        Canvas meshCanvas = new Canvas(meshBitmap);
+        meshCanvas.drawBitmapMesh(bitmap, rect.width(), rect.height()
+                , new float[] {
+                        (rect.left - offsetX) / mScale, (rect.top - offsetY) / mScale,
+                        (rect.right - offsetX) / mScale, (rect.top - offsetY) / mScale,
+                        (rect.left - offsetX) / mScale, (rect.bottom - offsetY) / mScale,
+                        (rect.right - offsetX) / mScale, (rect.bottom - offsetY) / mScale
+                }
+                , 0, null, 0, null);
+
+        return meshBitmap;
     }
 }
