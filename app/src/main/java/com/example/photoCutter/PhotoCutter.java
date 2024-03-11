@@ -11,12 +11,18 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 /**图片裁剪框
  * @author chenjiezhu
@@ -494,60 +500,54 @@ public class PhotoCutter extends View {
         canvas.drawBitmap(mBitmap, bmpMatrix, null);
 
 
-        //使用mesh扭曲bitmap到想要的状态：
-        Bitmap meshBitmap = Bitmap.createBitmap(bitmap);
+//        //使用mesh扭曲bitmap到想要的状态：
+//        Bitmap meshBitmap = Bitmap.createBitmap(bitmap);
+//        Canvas meshCanvas = new Canvas(meshBitmap);
+//        //使用反向mesh效果不佳
+//        meshCanvas.drawBitmapMesh(bitmap, 1, 1, new float[]
+//                {
+//                        -(mVectorPoint[0].x - offsetX) / mScale, -(mVectorPoint[0].y - offsetX) / mScale,
+//                        bitmap.getWidth() + (bitmap.getWidth() - (mVectorPoint[1].x - mVectorPoint[0].x) / mScale), -(mVectorPoint[1].y - offsetX) / mScale,
+//                        -(mVectorPoint[3].x - offsetX) / mScale, bitmap.getHeight() + (bitmap.getHeight() - (mVectorPoint[3].y - mVectorPoint[0].y) / mScale),
+//                        bitmap.getWidth() + (bitmap.getWidth() - (mVectorPoint[2].x - mVectorPoint[3].x) / mScale), bitmap.getHeight() + (bitmap.getHeight() - (mVectorPoint[2].y - mVectorPoint[1].y) / mScale),
+//
+//                }, 0, null, 0, mSelectorRectPointPaint);
+
+
+        Bitmap meshBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas meshCanvas = new Canvas(meshBitmap);
-//        meshCanvas.drawBitmapMesh(bitmap, 2, 2  //(2 + 1) * (2 + 1) * 2
-//                ,new float[] {
-//
-//                        (-mVectorPoint[0].x - offsetX) / mScale, -(mVectorPoint[0].y - offsetY) / mScale,
-//                        (-(mVectorPoint[0].x + mVectorPoint[1].x) / 2 - offsetX) / mScale, -((mVectorPoint[0].y + mVectorPoint[1].y) / 2 - offsetY) / mScale,
-//                        (-mVectorPoint[1].x - offsetX) / mScale, -(mVectorPoint[1].y - offsetY) / mScale,
-//
-//                        -((mVectorPoint[0].x + mVectorPoint[3].x) / 2 - offsetX) / mScale, -((mVectorPoint[0].y + mVectorPoint[3].y) / 2 - offsetY) / mScale,
-//
-//                        -(((mVectorPoint[0].x + mVectorPoint[3].x) / 2 - offsetX) / mScale + ((mVectorPoint[1].x + mVectorPoint[2].x) / 2 - offsetX) / mScale) / 2,
-//                        -(((mVectorPoint[0].y + mVectorPoint[3].y) / 2 - offsetY) / mScale + ((mVectorPoint[1].y + mVectorPoint[2].y) / 2 - offsetY) / mScale) / 2,
-//
-//
-//                        -((mVectorPoint[1].x + mVectorPoint[2].x) / 2 - offsetX) / mScale, -((mVectorPoint[1].x + mVectorPoint[2].x) / 2 - offsetY) / mScale,
-//
-//                        (-mVectorPoint[3].x - offsetX) / mScale, -(mVectorPoint[3].y - offsetY) / mScale,
-//                        (-(mVectorPoint[3].x + mVectorPoint[2].x) / 2 - offsetX) / mScale, -((mVectorPoint[3].y + mVectorPoint[2].y) / 2 - offsetY) / mScale,
-//                        (-mVectorPoint[2].x - offsetX) / mScale, -(mVectorPoint[2].y - offsetY) / mScale,
-//
-//                }
-//                , 0, null, 0, mSelectorRectPointPaint);
+        // 定义源图像的四个顶点坐标
+        float[] srcPoints = new float[] {
+                0, 0,                           // 左上角
+                bitmap.getWidth(), 0,   // 右上角
+                0, bitmap.getHeight(),  // 左下角
+                bitmap.getWidth(), bitmap.getHeight()  // 右下角
+        };
 
-        meshCanvas.drawBitmapMesh(bitmap, 1, 1, new float[]
-                {
-                        -(mVectorPoint[0].x - offsetX) / mScale, -(mVectorPoint[0].y - offsetY) / mScale,
-                        (mVectorPoint[1].x - offsetX) / mScale, (mVectorPoint[1].y - offsetY) / mScale,
+        // 定义目标图像的四个顶点坐标
+        float[] dstPoints = new float[] {
+//                        -(mVectorPoint[0].x - offsetX) / mScale, -(mVectorPoint[0].y - offsetY) / mScale,
+//                        bitmap.getWidth() + (bitmap.getWidth() - (mVectorPoint[1].x - mVectorPoint[0].x) / mScale), -(mVectorPoint[1].y - offsetY) / mScale,
+//                        -(mVectorPoint[3].x - offsetX) / mScale, bitmap.getHeight() + (bitmap.getHeight() - (mVectorPoint[3].y - mVectorPoint[0].y) / mScale),
+//                        bitmap.getWidth() + (bitmap.getWidth() - (mVectorPoint[2].x - mVectorPoint[3].x) / mScale), bitmap.getHeight() + (bitmap.getHeight() - (mVectorPoint[2].y - mVectorPoint[1].y) / mScale),
 
-                        (mVectorPoint[3].x - offsetX) / mScale, (mVectorPoint[3].y - offsetY) / mScale,
-                        (mVectorPoint[2].x - offsetX) / mScale, (mVectorPoint[2].y - offsetY) / mScale,
-                }, 0, new int[] {Color.RED, Color.RED, Color.RED, Color.RED, Color.RED, Color.RED, Color.RED, Color.RED}, 0, mSelectorRectPointPaint);
+                (mVectorPoint[0].x - offsetX) / mScale, (mVectorPoint[0].y - offsetY) / mScale,
+                (mVectorPoint[1].x - offsetX) / mScale, (mVectorPoint[1].y - offsetY) / mScale,   // 右上角
+                (mVectorPoint[3].x - offsetX) / mScale, (mVectorPoint[3].y - offsetY) / mScale,  // 左下角
+                (mVectorPoint[2].x - offsetX) / mScale, (mVectorPoint[2].y - offsetY) / mScale  // 右下角
+        };
 
+        Log.e("cjztest", String.format("dstPoints:[%f, %f], [%f, %f], [%f, %f], [%f, %f]",
+                dstPoints[0], dstPoints[1],
+                dstPoints[2], dstPoints[3],   // 右上角
+                dstPoints[4], dstPoints[5],  // 左下角
+                dstPoints[6], dstPoints[7]  // 右下角
+                 ));
 
-//        int count = 10;
-//        //y = kx + b => kx => k = y / x;
-//        //k0斜率逐渐走到k1
-//        float k0 = ((mVectorPoint[1].y - mVectorPoint[0].y - offsetY) / mScale) / ((mVectorPoint[1].x - mVectorPoint[0].x - offsetX) / mScale);
-//        float k1 = ((mVectorPoint[2].y - mVectorPoint[3].y - offsetY) / mScale) / ((mVectorPoint[2].x - mVectorPoint[3].x - offsetX) / mScale);
-//        float points[] = new float[(count + 1) * (count + 1) * 2];
-//        float deltaX = (mVectorPoint[1].x - mVectorPoint[0].x - offsetX) / mScale / (float) count;
-//        float deltaY = (mVectorPoint[3].y - mVectorPoint[0].y - offsetY) / mScale / (float) count;
-//        for (int x = 0; x <= count; x ++) {
-//            for (int y = 0; y <= count; y ++) {
-//                int index = y * (count + 1) + x;
-//                if (index % 2 == 0) { // x = y / k
-//                    points[index] = index * 10;
-//                } else { //y
-//                    points[index] = index * 10;
-//                }
-//            }
-//        }
-//        meshCanvas.drawBitmapMesh(bitmap, count, count, points, 0, null, 0, mSelectorRectPointPaint);
+        Matrix matrix = new Matrix();
+        matrix.setPolyToPoly(dstPoints, 0, srcPoints, 0, 4);
+        meshCanvas.drawColor(Color.GREEN);
+        meshCanvas.drawBitmap(bitmap, matrix, null);
 
         return meshBitmap;
     }
