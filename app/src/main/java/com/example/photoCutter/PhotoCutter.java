@@ -477,15 +477,6 @@ public class PhotoCutter extends View {
         Canvas canvas = new Canvas(bitmap);
         canvas.drawColor(Color.TRANSPARENT);
 
-
-        //todo 基本正确但要调整
-        float oppositeEdge = bottom - mVectorPoint[3].y;
-        float adjacentEdge = right - mVectorPoint[3].x;
-        double angle = Math.toDegrees(Math.atan(oppositeEdge / adjacentEdge));
-        Log.i("cjztest", "angle:" + angle);
-
-
-
                 //将裁剪范围应用于画布
         Path cutterPathClone = new Path(mCutterClipPath);
         Matrix pathMatrix = new Matrix();
@@ -499,53 +490,26 @@ public class PhotoCutter extends View {
         bmpMatrix.setTranslate(-(rect.left - offsetX) / mScale, -(rect.top - offsetY) / mScale);
         canvas.drawBitmap(mBitmap, bmpMatrix, null);
 
-
-//        //使用mesh扭曲bitmap到想要的状态：
-//        Bitmap meshBitmap = Bitmap.createBitmap(bitmap);
-//        Canvas meshCanvas = new Canvas(meshBitmap);
-//        //使用反向mesh效果不佳
-//        meshCanvas.drawBitmapMesh(bitmap, 1, 1, new float[]
-//                {
-//                        -(mVectorPoint[0].x - offsetX) / mScale, -(mVectorPoint[0].y - offsetX) / mScale,
-//                        bitmap.getWidth() + (bitmap.getWidth() - (mVectorPoint[1].x - mVectorPoint[0].x) / mScale), -(mVectorPoint[1].y - offsetX) / mScale,
-//                        -(mVectorPoint[3].x - offsetX) / mScale, bitmap.getHeight() + (bitmap.getHeight() - (mVectorPoint[3].y - mVectorPoint[0].y) / mScale),
-//                        bitmap.getWidth() + (bitmap.getWidth() - (mVectorPoint[2].x - mVectorPoint[3].x) / mScale), bitmap.getHeight() + (bitmap.getHeight() - (mVectorPoint[2].y - mVectorPoint[1].y) / mScale),
-//
-//                }, 0, null, 0, mSelectorRectPointPaint);
-
-
         Bitmap meshBitmap = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas meshCanvas = new Canvas(meshBitmap);
         // 定义源图像的四个顶点坐标
-        float[] srcPoints = new float[] {
+        float[] dstPoints = new float[] {
                 0, 0,                           // 左上角
                 bitmap.getWidth(), 0,   // 右上角
                 0, bitmap.getHeight(),  // 左下角
                 bitmap.getWidth(), bitmap.getHeight()  // 右下角
         };
 
-        // 定义目标图像的四个顶点坐标
-        float[] dstPoints = new float[] {
-//                        -(mVectorPoint[0].x - offsetX) / mScale, -(mVectorPoint[0].y - offsetY) / mScale,
-//                        bitmap.getWidth() + (bitmap.getWidth() - (mVectorPoint[1].x - mVectorPoint[0].x) / mScale), -(mVectorPoint[1].y - offsetY) / mScale,
-//                        -(mVectorPoint[3].x - offsetX) / mScale, bitmap.getHeight() + (bitmap.getHeight() - (mVectorPoint[3].y - mVectorPoint[0].y) / mScale),
-//                        bitmap.getWidth() + (bitmap.getWidth() - (mVectorPoint[2].x - mVectorPoint[3].x) / mScale), bitmap.getHeight() + (bitmap.getHeight() - (mVectorPoint[2].y - mVectorPoint[1].y) / mScale),
-
-                (mVectorPoint[0].x - offsetX) / mScale, (mVectorPoint[0].y - offsetY) / mScale,
-                (mVectorPoint[1].x - offsetX) / mScale, (mVectorPoint[1].y - offsetY) / mScale,   // 右上角
-                (mVectorPoint[3].x - offsetX) / mScale, (mVectorPoint[3].y - offsetY) / mScale,  // 左下角
-                (mVectorPoint[2].x - offsetX) / mScale, (mVectorPoint[2].y - offsetY) / mScale  // 右下角
+        // 定义目标图像的四个顶点坐标 因为mVectorPoint带有原本完整图像的偏移坐标，而操作已经以外接矩形为范围割出来的bitmap对象已经无需这个偏移坐标，因此要减去分割用的rect的left和top
+        float[] srcPoints = new float[] {
+                (mVectorPoint[0].x - left) / mScale, (mVectorPoint[0].y - top) / mScale, //左上角
+                (mVectorPoint[1].x - left) / mScale, (mVectorPoint[1].y - top) / mScale,   // 右上角
+                (mVectorPoint[3].x - left) / mScale, (mVectorPoint[3].y - top) / mScale,  // 左下角
+                (mVectorPoint[2].x - left) / mScale, (mVectorPoint[2].y - top) / mScale  // 右下角
         };
 
-        Log.e("cjztest", String.format("dstPoints:[%f, %f], [%f, %f], [%f, %f], [%f, %f]",
-                dstPoints[0], dstPoints[1],
-                dstPoints[2], dstPoints[3],   // 右上角
-                dstPoints[4], dstPoints[5],  // 左下角
-                dstPoints[6], dstPoints[7]  // 右下角
-                 ));
-
         Matrix matrix = new Matrix();
-        matrix.setPolyToPoly(dstPoints, 0, srcPoints, 0, 4);
+        matrix.setPolyToPoly(srcPoints, 0, dstPoints, 0, 4);
         meshCanvas.drawColor(Color.GREEN);
         meshCanvas.drawBitmap(bitmap, matrix, null);
 

@@ -37,5 +37,6 @@
         android:id="@+id/iv_cutter_result"
         android:layout_width="200dp"
         android:layout_height="200dp"
+        android:scaleType="fitCenter"
         android:layout_alignParentBottom="true"/>
 </RelativeLayout>
