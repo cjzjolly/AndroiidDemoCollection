@@ -45,9 +45,9 @@
         </activity>
         <activity android:name="com.example.swipeLayoutDemo.MainActivity">
         </activity>
-        <activity android:name="com.cjz.demo.MainActivity">
-        </activity>
         <activity android:name="com.kmo.topbar2023_2.MainActivity">
+        </activity>
+        <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
