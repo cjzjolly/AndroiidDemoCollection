@@ -14,6 +14,7 @@ import com.example.dctDemo.DCTTestDemo;
 import com.example.demosAboutCanvas.ChangeColorAfterDraw;
 import com.example.effectByScrollInOut.EffectDemoActivity;
 import com.example.eldestBmpOutCache.TestActivity;
+import com.example.lifecycle.LifeCycleDemo;
 import com.example.pdfReader.PdfReaderDemo;
 import com.example.photoCutter.CutterActivity;
 import com.example.photoSelector.PhotoSelectorPageActivity;
@@ -32,6 +33,14 @@ public class MainActivity extends Activity {
         linearLayoutContainer.setOrientation(LinearLayout.VERTICAL);
         scrollView.addView(linearLayoutContainer);
         setContentView(scrollView);
+        //LifeCycleObserver：
+        Button btnDemoLifeCycleObserver = new Button(this);
+        btnDemoLifeCycleObserver.setText("LifeCycleObserver");
+        btnDemoLifeCycleObserver.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, LifeCycleDemo.class));
+        });
+        linearLayoutContainer.addView(btnDemoLifeCycleObserver);
+
         //仿B站竖屏视频拉伸：
         Button btnDemoBigHeightVideoScale = new Button(this);
         btnDemoBigHeightVideoScale.setText("仿B站竖屏视频拉伸");
