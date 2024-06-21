@@ -28,7 +28,7 @@ public class MapUnit {
     private RectF mMapRange;
     private int mUnitXY[] = new int[] {Integer.MIN_VALUE, Integer.MIN_VALUE};
     private float mScale = 1f;
-    private final boolean mIsDebug = true;
+    private final boolean mIsDebug = false;
     private int mMapViewWidth = 0;
     private int mMapViewHeight = 0;
 
