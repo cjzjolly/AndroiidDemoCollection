@@ -49,6 +49,8 @@
         </activity>
         <activity android:name="com.example.lifecycle.LifeCycleDemo">
         </activity>
+        <activity android:name="com.example.binderDemo.BinderDemoActivity">
+        </activity>
         <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -56,6 +58,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name="com.example.binderDemo.BindService"
+            android:exported="true">
+        </service>
     </application>
 
 </manifest>

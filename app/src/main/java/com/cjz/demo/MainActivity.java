@@ -9,6 +9,7 @@ import android.widget.ScrollView;
 
 import androidx.annotation.Nullable;
 
+import com.example.binderDemo.BinderDemoActivity;
 import com.example.cameraXDemo.CameraXDemoActivity_1;
 import com.example.dctDemo.DCTTestDemo;
 import com.example.demosAboutCanvas.ChangeColorAfterDraw;
@@ -40,6 +41,14 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, LifeCycleDemo.class));
         });
         linearLayoutContainer.addView(btnDemoLifeCycleObserver);
+        //binder和service体验:
+        Button btnDemoServier = new Button(this);
+        btnDemoServier.setText("binder和service体验");
+        btnDemoServier.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, BinderDemoActivity.class));
+        });
+        linearLayoutContainer.addView(btnDemoServier);
+
 
         //仿B站竖屏视频拉伸：
         Button btnDemoBigHeightVideoScale = new Button(this);
