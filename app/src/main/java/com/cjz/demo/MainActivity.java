@@ -9,6 +9,7 @@ import android.widget.ScrollView;
 
 import androidx.annotation.Nullable;
 
+import com.example.binderDemo.AidlDemoActivity;
 import com.example.binderDemo.BinderDemoActivity;
 import com.example.cameraXDemo.CameraXDemoActivity_1;
 import com.example.dctDemo.DCTTestDemo;
@@ -42,13 +43,19 @@ public class MainActivity extends Activity {
         });
         linearLayoutContainer.addView(btnDemoLifeCycleObserver);
         //binder和service体验:
-        Button btnDemoServier = new Button(this);
-        btnDemoServier.setText("binder和service体验");
-        btnDemoServier.setOnClickListener(v -> {
+        Button btnDemoService = new Button(this);
+        btnDemoService.setText("binder和service体验");
+        btnDemoService.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, BinderDemoActivity.class));
         });
-        linearLayoutContainer.addView(btnDemoServier);
-
+        linearLayoutContainer.addView(btnDemoService);
+        //aidl和service体验:
+        Button btnDemoAIDLService = new Button(this);
+        btnDemoAIDLService.setText("AIDL和service体验");
+        btnDemoAIDLService.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, AidlDemoActivity.class));
+        });
+        linearLayoutContainer.addView(btnDemoAIDLService);
 
         //仿B站竖屏视频拉伸：
         Button btnDemoBigHeightVideoScale = new Button(this);

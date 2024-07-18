@@ -51,6 +51,8 @@
         </activity>
         <activity android:name="com.example.binderDemo.BinderDemoActivity">
         </activity>
+        <activity android:name="com.example.binderDemo.AidlDemoActivity">
+        </activity>
         <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -60,6 +62,13 @@
         </activity>
         <service android:name="com.example.binderDemo.BindService"
             android:exported="true">
+        </service>
+        <service android:name="com.example.binderDemo.AidlService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.binderDemo.action.AIDL_SERVICE" />
+            </intent-filter>
         </service>
     </application>
 

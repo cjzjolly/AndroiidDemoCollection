@@ -52,6 +52,7 @@ public class BinderDemoActivity extends Activity {
         Button toastBtn = new Button(this);
         toastBtn.setText("show service's count");
         toastBtn.setOnClickListener(view -> {
+            //通过binder从service里面拿数据
             Toast
                     .makeText(BinderDemoActivity.this, "service的count计数已到：" + binder.getCount(),  Toast.LENGTH_SHORT)
                     .show();
