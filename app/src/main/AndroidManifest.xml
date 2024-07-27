@@ -53,6 +53,8 @@
         </activity>
         <activity android:name="com.example.binderDemo.AidlDemoActivity">
         </activity>
+        <activity android:name="com.example.eraserSpeedUp.MainActivity">
+        </activity>
         <activity android:name="com.cjz.demo.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

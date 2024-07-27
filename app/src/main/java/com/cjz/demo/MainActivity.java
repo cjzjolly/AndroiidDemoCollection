@@ -154,5 +154,12 @@ public class MainActivity extends Activity {
             startActivity(new Intent(MainActivity.this, com.example.swipeLayoutDemo.MainActivity.class));
         });
         linearLayoutContainer.addView(btnSwipeLayout);
+        //自定义swipeLayout
+        Button btnEraserSpeedUp = new Button(this);
+        btnEraserSpeedUp.setText("擦除速度加速测试");
+        btnEraserSpeedUp.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, com.example.eraserSpeedUp.MainActivity.class));
+        });
+        linearLayoutContainer.addView(btnEraserSpeedUp);
     }
 }
